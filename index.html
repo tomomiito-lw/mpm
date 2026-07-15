@@ -416,29 +416,90 @@ function buildRoom(data){
   rRenderer.render(rScene,rCam);
 }
 
+function showInitialAvatar(name) {
+  var el = document.getElementById('mhead-avatar');
+  // canvas でイニシャルアイコンを生成
+  var cv = document.createElement('canvas');
+  cv.width = 96; cv.height = 96;
+  var ctx = cv.getContext('2d');
+  ctx.fillStyle = '#e0e8f0';
+  ctx.beginPath(); ctx.arc(48,48,48,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#5577aa';
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(name.charAt(0) || '?', 48, 50);
+  el.src = cv.toDataURL();
+  el.style.display = 'block';
+}
+
+/* ─── Google Drive URL → 直接表示URL変換 ─── */
+function toDriveImg(url, size) {
+  if (!url) return '';
+  size = size || 400;
+  // パターン1: /file/d/{id}/view
+  var m1 = url.match(/\/file\/d\/([^\/]+)/);
+  if (m1) return 'https://drive.google.com/thumbnail?id=' + m1[1] + '&sz=w' + size;
+  // パターン2: ?id={id} or &id={id}
+  var m2 = url.match(/[?&]id=([^&]+)/);
+  if (m2) return 'https://drive.google.com/thumbnail?id=' + m2[1] + '&sz=w' + size;
+  // パターン3: /open?id={id}
+  var m3 = url.match(/open\?id=([^&]+)/);
+  if (m3) return 'https://drive.google.com/thumbnail?id=' + m3[1] + '&sz=w' + size;
+  return url; // 変換不要のURL
+}
+
+/* ─── 部屋の壁に作品を飾る ─── */
+function hangArtwork(imgUrl) {
+  if (!imgUrl) return;
+  var directUrl = toDriveImg(imgUrl, 400);
+  var loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
+  loader.load(directUrl, function(tex) {
+    // 額縁（木枠）
+    mkB(rScene, 2.1, 1.5, 0.08, 0x8B6340, 0, 1.9, -2.88);
+    // 作品画像
+    var artMat = new THREE.MeshLambertMaterial({ map: tex });
+    var art = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 0.05), artMat);
+    art.position.set(0, 1.9, -2.86);
+    rScene.add(art);
+    fitRoomCamera();
+    rRenderer.render(rScene, rCam);
+  }, undefined, function() {
+    // 画像読み込み失敗時はカラープレースホルダー
+    mkB(rScene, 2.1, 1.5, 0.08, 0x8B6340, 0, 1.9, -2.88);
+    mkB(rScene, 1.8, 1.2, 0.05, 0xddccbb, 0, 1.9, -2.86);
+    fitRoomCamera();
+    rRenderer.render(rScene, rCam);
+  });
+}
+
 /* ─── modal ─── */
 function openModal(data){
   var creator = roomData[data.roomNum] || null;
   var fn=data.floor+1, cn=data.col+1;
   var tier=fn<4?'低層':fn<8?'中層':'高層';
 
-  // head
+  // アバター → イニシャルアイコンにフォールバック
   var avatarEl = document.getElementById('mhead-avatar');
-  if(creator && creator['作品画像']){
-    // Google Drive URLをdirect表示URLに変換
-    var imgUrl = creator['作品画像'];
-    var driveMatch = imgUrl.match(/[?&]id=([^&]+)/);
-    if(driveMatch) imgUrl = 'https://drive.google.com/thumbnail?id='+driveMatch[1]+'&sz=w200';
-    avatarEl.src = imgUrl;
+  var name = creator ? (creator['氏名'] || '') : '';
+  if (creator && creator['作品画像']) {
+    var thumbUrl = toDriveImg(creator['作品画像'], 200);
+    avatarEl.src = thumbUrl;
     avatarEl.style.display = 'block';
+    avatarEl.onerror = function() {
+      avatarEl.style.display = 'none';
+      showInitialAvatar(name);
+    };
   } else {
     avatarEl.style.display = 'none';
+    if (name) showInitialAvatar(name);
   }
 
   document.getElementById('mtitle').textContent = creator ? (creator['氏名'] || '名前未設定') : fn+'階 '+cn+'号室';
   document.getElementById('msub').textContent = (creator && creator['所属'] ? creator['所属']+' · ' : '') + tier+'階 · '+data.roomNum+'号室';
 
   buildRoom(data);
+  if (creator && creator['作品画像']) hangArtwork(creator['作品画像']);
 
   // creator info
   var html = '';
