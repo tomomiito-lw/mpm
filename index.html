@@ -94,10 +94,10 @@ var GAS_TOKEN = 'mpm-secret-2026';
 
 /* ─── dummy data for local preview ─── */
 var DUMMY_DATA = [
-  {'部屋番号':'205','氏名':'山田 花子','所属':'ロフトワーク','タグ':'イラスト, キャラクターデザイン, アニメーション','自己紹介':'東京を拠点に活動するイラストレーターです。キャラクターデザインを中心に、アニメーションや絵本制作も行っています。','WEBサイト':'https://example.com','SNS：Instagram':'@hanako_art','SNS：Twitter':'@hanako_tw','SNS：other':'','URL':'','作品画像':''},
-  {'部屋番号':'304','氏名':'鈴木 太郎','所属':'フリーランス','タグ':'写真, ポートレート, 映像','自己紹介':'写真と映像を軸に活動しています。人物撮影・ブランドムービー制作が得意です。','WEBサイト':'https://example2.com','SNS：Instagram':'@taro_photo','SNS：Twitter':'','SNS：other':'','URL':'https://vimeo.com/example','作品画像':''},
-  {'部屋番号':'502','氏名':'佐藤 美咲','所属':'デザイン会社','タグ':'WEBデザイン, UI/UX, グラフィック','自己紹介':'UIデザインとブランディングを専門とするデザイナーです。使いやすくて美しいデザインを目指しています。','WEBサイト':'https://example3.com','SNS：Instagram':'','SNS：Twitter':'@misaki_design','SNS：other':'https://behance.net/example','URL':'','作品画像':''},
-  {'部屋番号':'103','氏名':'田中 健','所属':'建築事務所','タグ':'建築, 空間デザイン, インスタレーション','自己紹介':'建築と現代アートの境界を探求しています。空間体験をデザインすることが私のテーマです。','WEBサイト':'https://example4.com','SNS：Instagram':'@ken_arch','SNS：Twitter':'','SNS：other':'','URL':'','作品画像':''}
+  {'部屋番号':'205','氏名':'test伊藤','所属':'ロフトワーク','タグ':'ファッション, 動画, WEBデザイン','自己紹介':'頑張ります','WEBサイト':'http://www.example.com','SNS：Instagram':'test','SNS：Twitter':'test','SNS：other':'test','URL':'','作品画像':'https://picsum.photos/seed/room205/400/300'},
+  {'部屋番号':'304','氏名':'鈴木 太郎','所属':'フリーランス','タグ':'写真, ポートレート, 映像','自己紹介':'写真と映像を軸に活動しています。人物撮影・ブランドムービー制作が得意です。','WEBサイト':'https://example2.com','SNS：Instagram':'@taro_photo','SNS：Twitter':'','SNS：other':'','URL':'https://vimeo.com/example','作品画像':'https://picsum.photos/seed/room304/400/300'},
+  {'部屋番号':'502','氏名':'佐藤 美咲','所属':'デザイン会社','タグ':'WEBデザイン, UI/UX, グラフィック','自己紹介':'UIデザインとブランディングを専門とするデザイナーです。使いやすくて美しいデザインを目指しています。','WEBサイト':'https://example3.com','SNS：Instagram':'','SNS：Twitter':'@misaki_design','SNS：other':'https://behance.net/example','URL':'','作品画像':'https://picsum.photos/seed/room502/400/300'},
+  {'部屋番号':'103','氏名':'田中 健','所属':'建築事務所','タグ':'建築, 空間デザイン, インスタレーション','自己紹介':'建築と現代アートの境界を探求しています。空間体験をデザインすることが私のテーマです。','WEBサイト':'https://example4.com','SNS：Instagram':'@ken_arch','SNS：Twitter':'','SNS：other':'','URL':'','作品画像':'https://picsum.photos/seed/room103/400/300'}
 ];
 
 /* ─── room data from GAS ─── */
@@ -452,22 +452,23 @@ function toDriveImg(url, size) {
 function hangArtwork(imgUrl) {
   if (!imgUrl) return;
   var directUrl = toDriveImg(imgUrl, 400);
+  // 額縁は左壁（x=-3.5側）に飾る
+  var frameX = -3.44, frameY = 1.9, frameZ = -0.5;
+  // 額縁（木枠）
+  var frame = mkB(rScene, 0.08, 1.5, 2.0, 0x8B6340, frameX, frameY, frameZ);
+
   var loader = new THREE.TextureLoader();
   loader.crossOrigin = 'anonymous';
   loader.load(directUrl, function(tex) {
-    // 額縁（木枠）
-    mkB(rScene, 2.1, 1.5, 0.08, 0x8B6340, 0, 1.9, -2.88);
-    // 作品画像
     var artMat = new THREE.MeshLambertMaterial({ map: tex });
-    var art = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 0.05), artMat);
-    art.position.set(0, 1.9, -2.86);
+    var art = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.2, 1.6), artMat);
+    art.position.set(frameX + 0.07, frameY, frameZ);
     rScene.add(art);
     fitRoomCamera();
     rRenderer.render(rScene, rCam);
   }, undefined, function() {
-    // 画像読み込み失敗時はカラープレースホルダー
-    mkB(rScene, 2.1, 1.5, 0.08, 0x8B6340, 0, 1.9, -2.88);
-    mkB(rScene, 1.8, 1.2, 0.05, 0xddccbb, 0, 1.9, -2.86);
+    // 失敗時はベージュのプレースホルダー
+    mkB(rScene, 0.05, 1.2, 1.6, 0xeeddcc, frameX + 0.07, frameY, frameZ);
     fitRoomCamera();
     rRenderer.render(rScene, rCam);
   });
