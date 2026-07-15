@@ -92,34 +92,16 @@ body{background:#1a1a2e;font-family:'Helvetica Neue',sans-serif;display:flex;fle
 var GAS_URL   = 'https://script.google.com/macros/s/AKfycbyarPw5dG4T5RQNOrrOdwUGDcA6m397ElSFfI_N4otvassWHDllUn_YcRV1FT3XhjF7Ng/exec';
 var GAS_TOKEN = 'mpm-secret-2026';
 
-/* ─── dummy data for local preview ─── */
-var DUMMY_DATA = [
-  {'部屋番号':'205','氏名':'test伊藤','所属':'ロフトワーク','タグ':'ファッション, 動画, WEBデザイン','自己紹介':'頑張ります','WEBサイト':'http://www.example.com','SNS：Instagram':'test','SNS：Twitter':'test','SNS：other':'test','URL':'','作品画像':'https://picsum.photos/seed/room205/400/300'},
-  {'部屋番号':'304','氏名':'鈴木 太郎','所属':'フリーランス','タグ':'写真, ポートレート, 映像','自己紹介':'写真と映像を軸に活動しています。人物撮影・ブランドムービー制作が得意です。','WEBサイト':'https://example2.com','SNS：Instagram':'@taro_photo','SNS：Twitter':'','SNS：other':'','URL':'https://vimeo.com/example','作品画像':'https://picsum.photos/seed/room304/400/300'},
-  {'部屋番号':'502','氏名':'佐藤 美咲','所属':'デザイン会社','タグ':'WEBデザイン, UI/UX, グラフィック','自己紹介':'UIデザインとブランディングを専門とするデザイナーです。使いやすくて美しいデザインを目指しています。','WEBサイト':'https://example3.com','SNS：Instagram':'','SNS：Twitter':'@misaki_design','SNS：other':'https://behance.net/example','URL':'','作品画像':'https://picsum.photos/seed/room502/400/300'},
-  {'部屋番号':'103','氏名':'田中 健','所属':'建築事務所','タグ':'建築, 空間デザイン, インスタレーション','自己紹介':'建築と現代アートの境界を探求しています。空間体験をデザインすることが私のテーマです。','WEBサイト':'https://example4.com','SNS：Instagram':'@ken_arch','SNS：Twitter':'','SNS：other':'','URL':'','作品画像':'https://picsum.photos/seed/room103/400/300'}
-];
-
 /* ─── room data from GAS ─── */
 var roomData = {};
 
 function loadRoomData() {
-  // まずダミーデータを適用（Claude上でのプレビュー用）
-  for (var di = 0; di < DUMMY_DATA.length; di++) {
-    var dr = DUMMY_DATA[di];
-    var dn = String(dr['部屋番号']).trim();
-    if (dn) roomData[dn] = dr;
-  }
-  applyShutters();
-  document.getElementById('lbl').textContent = 'ドラッグで回転 · ベランダをクリックで部屋を確認';
-
-  // 本番ではGASからデータを取得して上書き
   document.getElementById('loading-indicator').style.display = 'block';
+  document.getElementById('lbl').textContent = '読み込み中...';
   var url = GAS_URL + '?token=' + GAS_TOKEN;
   fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(rows){
-      // GASが正常に返したらdummyを上書き
       roomData = {};
       for (var i = 0; i < rows.length; i++) {
         var row = rows[i];
@@ -127,10 +109,12 @@ function loadRoomData() {
         if (num) roomData[num] = row;
       }
       applyShutters();
+      document.getElementById('lbl').textContent = 'ドラッグで回転 · ベランダをクリックで部屋を確認';
     })
-    .catch(function(){
-      // fetchに失敗してもダミーデータで動作継続
-      console.warn('GAS fetch failed — using dummy data');
+    .catch(function(err){
+      console.warn('GAS fetch failed:', err);
+      document.getElementById('lbl').textContent = 'ドラッグで回転 · ベランダをクリックで部屋を確認';
+      applyShutters();
     })
     .finally(function(){
       document.getElementById('loading-indicator').style.display = 'none';
@@ -452,26 +436,49 @@ function toDriveImg(url, size) {
 function hangArtwork(imgUrl) {
   if (!imgUrl) return;
   var directUrl = toDriveImg(imgUrl, 400);
-  // 額縁は左壁（x=-3.5側）に飾る
   var frameX = -3.44, frameY = 1.9, frameZ = -0.5;
-  // 額縁（木枠）
-  var frame = mkB(rScene, 0.08, 1.5, 2.0, 0x8B6340, frameX, frameY, frameZ);
 
-  var loader = new THREE.TextureLoader();
-  loader.crossOrigin = 'anonymous';
-  loader.load(directUrl, function(tex) {
-    var artMat = new THREE.MeshLambertMaterial({ map: tex });
-    var art = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.2, 1.6), artMat);
-    art.position.set(frameX + 0.07, frameY, frameZ);
-    rScene.add(art);
-    fitRoomCamera();
-    rRenderer.render(rScene, rCam);
-  }, undefined, function() {
-    // 失敗時はベージュのプレースホルダー
-    mkB(rScene, 0.05, 1.2, 1.6, 0xeeddcc, frameX + 0.07, frameY, frameZ);
-    fitRoomCamera();
-    rRenderer.render(rScene, rCam);
-  });
+  // 額縁（木枠）は先に表示
+  mkB(rScene, 0.08, 1.5, 2.0, 0x8B6340, frameX, frameY, frameZ);
+  // 内側のプレースホルダー（白）
+  var placeholder = mkB(rScene, 0.05, 1.2, 1.6, 0xf5f0e8, frameX + 0.07, frameY, frameZ);
+  fitRoomCamera();
+  rRenderer.render(rScene, rCam);
+
+  // 画像読み込み試行
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    try {
+      var tex = new THREE.Texture(img);
+      tex.needsUpdate = true;
+      var artMat = new THREE.MeshLambertMaterial({ map: tex });
+      placeholder.material = artMat;
+      placeholder.material.needsUpdate = true;
+      rRenderer.render(rScene, rCam);
+    } catch(e) { /* テクスチャ失敗時はプレースホルダーのまま */ }
+  };
+  img.onerror = function() {
+    // CORS失敗時: canvas で色付きプレースホルダーを生成
+    try {
+      var cv2 = document.createElement('canvas');
+      cv2.width = 256; cv2.height = 192;
+      var ctx2 = cv2.getContext('2d');
+      var grad = ctx2.createLinearGradient(0,0,256,192);
+      grad.addColorStop(0, '#c8d8e8');
+      grad.addColorStop(1, '#e8d8c8');
+      ctx2.fillStyle = grad;
+      ctx2.fillRect(0,0,256,192);
+      ctx2.fillStyle = 'rgba(100,100,100,0.3)';
+      ctx2.font = '16px sans-serif';
+      ctx2.textAlign = 'center';
+      ctx2.fillText('作品画像', 128, 100);
+      var tex2 = new THREE.CanvasTexture(cv2);
+      placeholder.material = new THREE.MeshLambertMaterial({ map: tex2 });
+      rRenderer.render(rScene, rCam);
+    } catch(e2) {}
+  };
+  img.src = directUrl;
 }
 
 /* ─── modal ─── */
