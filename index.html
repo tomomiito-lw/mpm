@@ -76,6 +76,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 var GAS_URL   = 'https://script.google.com/macros/s/AKfycbyarPw5dG4T5RQNOrrOdwUGDcA6m397ElSFfI_N4otvassWHDllUn_YcRV1FT3XhjF7Ng/exec';
 var GAS_TOKEN = 'mpm-secret-2026';
 var roomData  = {};
+var firstLoad = true;
 
 // SVGをfetchして埋め込む
 fetch('mansion_new.svg')
@@ -109,6 +110,8 @@ function applyOccupancy(){
   var wins = document.querySelectorAll('[id^="win-"]');
   wins.forEach(function(el){
     var roomNum = el.id.replace('win-', '');
+    // 側面窓はスキップ（後で処理）
+    if(roomNum.indexOf('side') !== -1) return;
     if(roomData[roomNum]){
       el.classList.add('win-occupied');
       el.style.cursor = 'pointer';
@@ -117,6 +120,16 @@ function applyOccupancy(){
       el.style.cursor = 'default';
     }
   });
+
+  // 側面窓：x01部屋に入居者がいれば同じ階の側面も黄色に
+  for(var floor = 1; floor <= 9; floor++){
+    var roomNum = String(floor * 100 + 1); // 101, 201, ...901
+    var occupied = !!roomData[roomNum];
+    var sideA = document.getElementById('win-side-A-' + floor);
+    var sideB = document.getElementById('win-side-B-' + floor);
+    if(sideA){ if(occupied){ sideA.classList.add('win-occupied'); } else { sideA.classList.remove('win-occupied'); } }
+    if(sideB){ if(occupied){ sideB.classList.add('win-occupied'); } else { sideB.classList.remove('win-occupied'); } }
+  }
 }
 
 function loadRoomData(){
@@ -128,8 +141,9 @@ function loadRoomData(){
         var n = String(row['部屋番号']||'').trim();
         if(n) newData[n] = row;
       });
-      var hasNew = Object.keys(newData).some(function(n){ return !roomData[n]; });
+      var hasNew = !firstLoad && Object.keys(newData).some(function(n){ return !roomData[n]; });
       roomData = newData;
+      firstLoad = false;
       applyOccupancy();
       if(hasNew) showNotice();
     })
