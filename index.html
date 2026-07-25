@@ -73,7 +73,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 <script>
 (function(){
 
-var GAS_URL   = 'https://script.google.com/macros/s/AKfycbyarPw5dG4T5RQNOrrOdwUGDcA6m397ElSFfI_N4otvassWHDllUn_YcRV1FT3XhjF7Ng/exec';
+var GAS_URL   = 'https://script.google.com/macros/s/AKfycbwwUC9ebQghTUUbEcMEsQwl9BS4tEQ2tK3_xWJTHYi-bEj2c5GooHbMYOdRDQ678knuvA/exec';
 var GAS_TOKEN = 'mpm-secret-2026';
 var roomData  = {};
 var firstLoad = true;
@@ -172,12 +172,8 @@ function startPolling(){
 
 // モーダル
 function toDriveImg(url, sz){
-  if(!url) return '';
-  var m = url.match(/\/file\/d\/([^\/]+)/);
-  if(m) return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w'+sz;
-  var m2 = url.match(/[?&]id=([^&]+)/);
-  if(m2) return 'https://drive.google.com/thumbnail?id='+m2[1]+'&sz=w'+sz;
-  return url;
+  // GASがBase64で返すのでそのまま使用
+  return url || '';
 }
 
 function initAvatar(name){
