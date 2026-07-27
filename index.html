@@ -263,8 +263,15 @@ function openModal(roomNum){
     var img = new Image();
     img.onload = function(){
       var ratio = img.naturalHeight / img.naturalWidth;
-      var artH = Math.round(artW * ratio);
-      renderRoomSVG(roomContainer, imgSrc, artX, artY, artW, artH, 720);
+      var maxW = 662, maxH = 500;
+      var artW2 = maxW, artH2 = Math.round(maxW * ratio);
+      if(artH2 > maxH){
+        artH2 = maxH;
+        artW2 = Math.round(maxH / ratio);
+      }
+      // 横幅が縮んだ場合は中央に配置
+      var artX2 = Math.round((1270 - artW2) / 2);
+      renderRoomSVG(roomContainer, imgSrc, artX2, artY, artW2, artH2, 720);
     };
     img.onerror = function(){
       renderRoomSVG(roomContainer, imgSrc, artX, artY, artW, 450, 720);
