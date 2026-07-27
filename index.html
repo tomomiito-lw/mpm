@@ -210,7 +210,7 @@ function openModal(roomNum){
 
   // ヘッダー：作品名 + 作者
   var title = cr ? (cr['MasterPiece名'] || '作品名未設定') : floor+'階 '+unit+'号室';
-  var sub   = '';
+  var sub = '';
   if(cr){
     if(cr['作者']) sub += cr['作者'];
     if(cr['制作年']) sub += (sub ? ' · ' : '') + cr['制作年'];
@@ -227,12 +227,16 @@ function openModal(roomNum){
     if(cr['作品概要']){
       h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
     }
+    // 自己紹介
+    if(cr['自己紹介']){
+      h += '<div class="cs"><div class="csh">作者について</div><p class="bio">'+cr['自己紹介']+'</p></div>';
+    }
     // リンク
     var ls = [];
-    if(cr['URL'])            ls.push({i:'🎨', l:'作品URL',      u: cr['URL']});
-    if(cr['SNS：Instagram']) ls.push({i:'📷', l:'Instagram',    u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
-    if(cr['SNS：Twitter'])   ls.push({i:'🐦', l:'Twitter / X', u: 'https://twitter.com/'+cr['SNS：Twitter'].replace('@','')});
-    if(cr['SNS：other'])     ls.push({i:'🔗', l:'その他SNS',   u: cr['SNS：other']});
+    if(cr['URL'])             ls.push({i:'🎨', l:'作品URL',      u: cr['URL']});
+    if(cr['SNS：Instagram'])  ls.push({i:'📷', l:'Instagram',    u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
+    if(cr['SNS：Twitter'])    ls.push({i:'🐦', l:'Twitter / X', u: 'https://twitter.com/'+cr['SNS：Twitter'].replace('@','')});
+    if(cr['SNS：other'])      ls.push({i:'🔗', l:'その他SNS',   u: cr['SNS：other']});
     if(ls.length){
       h += '<div class="cs"><div class="csh">リンク</div><div class="links">';
       ls.forEach(function(lk){ h += '<a class="lnk" href="'+lk.u+'" target="_blank" rel="noopener"><span class="lnk-i">'+lk.i+'</span>'+lk.l+'</a>'; });
