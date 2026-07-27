@@ -275,10 +275,6 @@ function openModal(roomNum){
   // 画像の上に部屋番号を大きく表示
   document.getElementById('room-number-overlay').textContent = roomNum + '号室';
 
-  // mtitle/msubは非表示（使わない）
-  if(document.getElementById('mtitle')) document.getElementById('mtitle').textContent = '';
-  if(document.getElementById('msub')) document.getElementById('msub').textContent = '';
-
   var h = '';
   if(cr){
     // 作品名・作者・制作年
