@@ -17,9 +17,11 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 .win-hover{fill:#f5d442 !important;cursor:pointer;}
 
 /* モーダル */
-#overlay{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);}
-#overlay.open{display:flex;}
-#mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);}
+#overlay{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,0);}
+#overlay.open{display:flex;animation:fadeOverlay 0.3s ease forwards;}
+@keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
+#mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
+#overlay.open #mbox{opacity:1;transform:translateY(0);}
 #mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid #eee;flex-shrink:0;}
 #mhead-left{display:flex;align-items:center;gap:12px;}
 #mhead-avatar{display:none;}
@@ -58,7 +60,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   margin-top:-8px;
   width:72px;
   text-align:center;
+  opacity:0;
+  transition:opacity 0.2s ease;
 }
+#tooltip.show{opacity:1;}
 #tooltip svg{
   width:100%;
   height:auto;
@@ -139,6 +144,7 @@ function initWindows(){
         el.classList.add('win-hover');
         document.getElementById('tooltip-text').textContent = roomNum + '号室';
         tooltip.style.display = 'block';
+        setTimeout(function(){ tooltip.classList.add('show'); }, 10);
       }
     });
     el.addEventListener('mousemove', function(e){
@@ -147,7 +153,8 @@ function initWindows(){
     });
     el.addEventListener('mouseleave', function(){
       el.classList.remove('win-hover');
-      tooltip.style.display = 'none';
+      tooltip.classList.remove('show');
+      setTimeout(function(){ tooltip.style.display = 'none'; }, 200);
     });
     el.addEventListener('click', function(){
       if(el.classList.contains('win-occupied')){
