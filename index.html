@@ -52,26 +52,28 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #tooltip{
   display:none;
   position:fixed;
-  background:#191818;
-  color:#fff;
-  font-size:12px;
-  font-weight:600;
-  padding:5px 10px;
-  border-radius:8px;
   pointer-events:none;
   z-index:300;
-  white-space:nowrap;
   transform:translate(-50%, -100%);
   margin-top:-8px;
+  width:120px;
+  text-align:center;
 }
-#tooltip::after{
-  content:'';
+#tooltip svg{
+  width:100%;
+  height:auto;
+  display:block;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
+#tooltip-text{
   position:absolute;
-  top:100%;
+  top:38%;
   left:50%;
-  transform:translateX(-50%);
-  border:5px solid transparent;
-  border-top-color:#191818;
+  transform:translate(-50%, -50%);
+  font-size:13px;
+  font-weight:700;
+  color:#191818;
+  white-space:nowrap;
 }
 </style>
 </head>
@@ -102,7 +104,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 <div id="live-badge">● LIVE（5秒更新）</div>
 <div id="new-notice">✨ 新しいクリエイターが入居しました！</div>
-<div id="tooltip"></div>
+<div id="tooltip">
+  <svg enable-background="new 0 0 800 574.943" viewBox="0 0 800 574.943" xmlns="http://www.w3.org/2000/svg"><path d="m264.156 445.155s35.975.445 74.477.615c-12.329 50.563-42.204 114.8-42.204 114.8s64.604-56.112 99.22-114.858c10.81-.104 19.97-.279 26.197-.557 216.944-9.641 395.361-194.394 351.466-326.08-34.703-104.11-308.644-137.234-554.964-68.978-246.322 68.254-297.861 376.246 45.808 395.058z" fill="#fff"/></svg>
+  <span id="tooltip-text"></span>
+</div>
 
 <script>
 (function(){
@@ -131,7 +136,7 @@ function initWindows(){
 
     el.addEventListener('mouseenter', function(e){
       if(el.classList.contains('win-occupied')) el.classList.add('win-hover');
-      tooltip.textContent = roomNum + '号室';
+      document.getElementById('tooltip-text').textContent = roomNum + '号室';
       tooltip.style.display = 'block';
     });
     el.addEventListener('mousemove', function(e){
