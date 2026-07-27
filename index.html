@@ -265,16 +265,21 @@ function openModal(roomNum){
   var tier  = floor < 4 ? '低層' : floor < 7 ? '中層' : '高層';
 
   // 画像
+  var imgEl = document.getElementById('mbody-img').querySelector('img');
   var imgCol = document.getElementById('mbody-img');
-  var imgHtml = '';
   if(cr && cr['MasterPiece画像']){
-    imgHtml = '<img src="'+cr['MasterPiece画像']+'" alt="作品画像">';
+    if(!imgEl){
+      imgEl = document.createElement('img');
+      imgEl.alt = '作品画像';
+      imgCol.insertBefore(imgEl, imgCol.firstChild);
+    }
+    imgEl.src = cr['MasterPiece画像'];
+    imgEl.style.display = 'block';
+  } else {
+    if(imgEl) imgEl.style.display = 'none';
   }
-  imgCol.innerHTML = imgHtml + '<div id="room-number-overlay">'+roomNum+'号室</div><button id="mclose-inner" onclick="document.getElementById(\'overlay\').classList.remove(\'open\')" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);cursor:pointer;font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;">✕</button>';
-
-  // 既存の#mcloseも念のため再バインド
-  var mc = document.getElementById('mclose');
-  if(mc) mc.onclick = function(){ document.getElementById('overlay').classList.remove('open'); };
+  // 部屋番号
+  document.getElementById('room-number-overlay').textContent = roomNum + '号室';
 
   var h = '';
   if(cr){
