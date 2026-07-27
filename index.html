@@ -253,42 +253,70 @@ function openModal(roomNum){
   var roomContainer = document.getElementById('room-svg-container');
   var imgSrc = (cr && cr['MasterPiece画像']) ? cr['MasterPiece画像'] : '';
 
-  // 作品画像エリア：x:253〜1015, y:30〜571（中央壁の内側にマージンを持たせる）
-  var artX = 303, artY = 50, artW = 662, artH = 500;
+  // 作品エリア：横幅固定(660px)、縦は画像に合わせて可変
+  // SVGのviewBoxは動的に設定する
+  var wallX = 203, wallW = 862; // 壁の横範囲
+  var artX = 303, artW = 662;   // 作品の横位置・幅
+  var artY = 50, artPad = 10;   // 作品の上マージン・パディング
 
-  var svgContent = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1270 720">'
+  if(imgSrc){
+    var img = new Image();
+    img.onload = function(){
+      var ratio = img.naturalHeight / img.naturalWidth;
+      var artH = Math.round(artW * ratio);
+      renderRoomSVG(roomContainer, imgSrc, artX, artY, artW, artH, 720);
+    };
+    img.onerror = function(){
+      renderRoomSVG(roomContainer, imgSrc, artX, artY, artW, 450, 720);
+    };
+    img.src = imgSrc;
+  } else {
+    renderRoomSVG(roomContainer, '', artX, artY, artW, 450, 720);
+  }
+
+  _openModalInfo(cr, roomNum);
+}
+
+function renderRoomSVG(container, imgSrc, artX, artY, artW, artH, svgH){
+  var leftW = 203, rightStart = 1065, totalW = 1270;
+  // 黄色パネルの高さはsvgHに合わせる
+  var floorY = svgH - 80;
+
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 '+totalW+' '+svgH+'">'
     + '<defs><style>.cls-1{fill:#fff}.cls-2{fill:#ffffa0}</style></defs>'
     // 白い壁（背景）
-    + '<rect class="cls-1" x="2.83" y="2.83" width="1264.33" height="712.3"/>'
-    // 枠線
-    + '<path d="M1270,717.97H0V0h1270v717.97ZM5.67,712.3h1258.66V5.67H5.67v706.63Z"/>'
+    + '<rect class="cls-1" x="2.83" y="2.83" width="'+(totalW-5.66)+'" height="'+(svgH-5.66)+'"/>'
+    // 外枠
+    + '<rect x="0" y="0" width="'+totalW+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
     // 床（黒い台形）
-    + '<polygon points="1265.8 715.13 1065.63 601.33 203 601.33 2.83 715.13 1265.8 715.13"/>'
+    + '<polygon points="'+totalW+' '+svgH+' '+rightStart+' '+floorY+' '+leftW+' '+floorY+' 0 '+svgH+'"/>'
     // 左の黄色パネル
-    + '<polygon class="cls-2" points="2.83 715.13 2.83 2.83 203 2.83 203 601.33 2.83 715.13"/>'
-    + '<path d="M0,720V0h205.83v602.98l-1.43.81L0,720ZM5.67,5.67v704.59l194.5-110.58V5.67H5.67Z"/>'
+    + '<polygon class="cls-2" points="0 '+svgH+' 0 0 '+leftW+' 0 '+leftW+' '+floorY+'"/>'
+    + '<rect x="0" y="0" width="'+leftW+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
     // 右の黄色パネル
-    + '<polygon class="cls-2" points="1265.8 715.13 1265.8 2.83 1065.63 2.83 1065.63 601.33 1265.8 715.13"/>'
-    + '<path d="M1268.63,720l-205.84-117.02V0h205.84v720ZM1068.46,599.68l194.5,110.58V5.67h-194.5v594.01Z"/>'
-    // 作品画像（額縁つき）
-    + (imgSrc
-      ? '<rect x="'+(artX-8)+'" y="'+(artY-8)+'" width="'+(artW+16)+'" height="'+(artH+16)+'" fill="#111"/>'
-        + '<image href="'+imgSrc+'" x="'+artX+'" y="'+artY+'" width="'+artW+'" height="'+artH+'" preserveAspectRatio="xMidYMid meet"/>'
-      : '<rect x="'+(artX-8)+'" y="'+(artY-8)+'" width="'+(artW+16)+'" height="'+(artH+16)+'" fill="#333"/>'
-        + '<text x="'+(artX+artW/2)+'" y="'+(artY+artH/2)+'" fill="#888" font-size="40" text-anchor="middle" dominant-baseline="middle">No Image</text>')
-    + '</svg>';
+    + '<polygon class="cls-2" points="'+totalW+' '+svgH+' '+totalW+' 0 '+rightStart+' 0 '+rightStart+' '+floorY+'"/>'
+    + '<rect x="'+rightStart+'" y="0" width="'+(totalW-rightStart)+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
+    // 作品（白背景＋borderのみ）
+    + '<rect x="'+(artX-artPad)+'" y="'+(artY-artPad)+'" width="'+(artW+artPad*2)+'" height="'+(artH+artPad*2)+'" fill="#fff" stroke="#000" stroke-width="3"/>';
 
-  roomContainer.innerHTML = svgContent;
+  if(imgSrc){
+    s += '<image href="'+imgSrc+'" x="'+artX+'" y="'+artY+'" width="'+artW+'" height="'+artH+'" preserveAspectRatio="xMidYMid meet"/>';
+  } else {
+    s += '<text x="'+(artX+artW/2)+'" y="'+(artY+artH/2)+'" fill="#aaa" font-size="36" text-anchor="middle" dominant-baseline="middle">No Image</text>';
+  }
 
+  s += '</svg>';
+  container.innerHTML = s;
+}
+
+function _openModalInfo(cr, roomNum){
   var h = '';
   if(cr){
-    // 作品名・作者・制作年
     if(cr['MasterPiece名']) h += '<div class="cs"><div class="csh">MasterPiece名</div><p class="bio" style="font-size:18px;font-weight:700;color:#111;">'+cr['MasterPiece名']+'</p></div>';
     if(cr['作者'])          h += '<div class="cs"><div class="csh">作者</div><p class="bio">'+cr['作者']+'</p></div>';
     if(cr['制作年'])        h += '<div class="cs"><div class="csh">制作年</div><p class="bio">'+cr['制作年']+'</p></div>';
     if(cr['作品概要'])      h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
     if(cr['自己紹介'])      h += '<div class="cs"><div class="csh">自己紹介</div><p class="bio">'+cr['自己紹介']+'</p></div>';
-    // リンク
     var ls = [];
     if(cr['URL'])             ls.push({i:'🎨', l:'URL',            u: cr['URL']});
     if(cr['SNS：Instagram'])  ls.push({i:'📷', l:'SNS：Instagram', u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
