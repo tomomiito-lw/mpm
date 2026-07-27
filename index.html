@@ -199,39 +199,48 @@ function openModal(roomNum){
   var floor = Math.floor(parseInt(roomNum)/100);
   var unit  = parseInt(roomNum) % 100;
   var tier  = floor < 4 ? '低層' : floor < 7 ? '中層' : '高層';
-  var name  = cr ? (cr['氏名']||'') : '';
 
-  // 左カラムに画像を大きく表示
+  // 画像
   var imgCol = document.getElementById('mbody-img');
-  if(cr && cr['作品画像']){
-    imgCol.innerHTML = '<img src="'+cr['作品画像']+'" alt="作品画像">';
+  if(cr && cr['MasterPiece画像']){
+    imgCol.innerHTML = '<img src="'+cr['MasterPiece画像']+'" alt="作品画像">';
   } else {
-    imgCol.innerHTML = '<span class="no-img">画像なし</span>';
+    imgCol.innerHTML = '';
   }
 
-  document.getElementById('mtitle').textContent = cr ? (cr['氏名']||'名前未設定') : floor+'階 '+unit+'号室';
-  document.getElementById('msub').textContent   = (cr&&cr['所属'] ? cr['所属']+' · ' : '') + tier+'階 · '+roomNum+'号室';
+  // ヘッダー：作品名 + 作者
+  var title = cr ? (cr['MasterPiece名'] || '作品名未設定') : floor+'階 '+unit+'号室';
+  var sub   = '';
+  if(cr){
+    if(cr['作者']) sub += cr['作者'];
+    if(cr['制作年']) sub += (sub ? ' · ' : '') + cr['制作年'];
+    sub += (sub ? ' · ' : '') + tier+'階 · '+roomNum+'号室';
+  } else {
+    sub = tier+'階 · '+roomNum+'号室';
+  }
+  document.getElementById('mtitle').textContent = title;
+  document.getElementById('msub').textContent   = sub;
 
   var h = '';
   if(cr){
-    if(cr['タグ']){
-      h += '<div class="cs"><div class="csh">専門分野</div><div class="tags">';
-      cr['タグ'].split(',').forEach(function(t){ h += '<span class="tag">'+t.trim()+'</span>'; });
-      h += '</div></div>';
+    // 作品概要
+    if(cr['作品概要']){
+      h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
     }
-    if(cr['自己紹介']){
-      h += '<div class="cs"><div class="csh">自己紹介</div><p class="bio">'+cr['自己紹介']+'</p></div>';
-    }
+    // リンク
     var ls = [];
-    if(cr['WEBサイト'])      ls.push({i:'🌐', l:'WEBサイト',   u: cr['WEBサイト']});
+    if(cr['URL'])            ls.push({i:'🎨', l:'作品URL',      u: cr['URL']});
     if(cr['SNS：Instagram']) ls.push({i:'📷', l:'Instagram',    u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
     if(cr['SNS：Twitter'])   ls.push({i:'🐦', l:'Twitter / X', u: 'https://twitter.com/'+cr['SNS：Twitter'].replace('@','')});
     if(cr['SNS：other'])     ls.push({i:'🔗', l:'その他SNS',   u: cr['SNS：other']});
-    if(cr['URL'])            ls.push({i:'🎨', l:'作品URL',      u: cr['URL']});
     if(ls.length){
       h += '<div class="cs"><div class="csh">リンク</div><div class="links">';
       ls.forEach(function(lk){ h += '<a class="lnk" href="'+lk.u+'" target="_blank" rel="noopener"><span class="lnk-i">'+lk.i+'</span>'+lk.l+'</a>'; });
       h += '</div></div>';
+    }
+    // Discord
+    if(cr['Discord name']){
+      h += '<div class="cs"><div class="csh">Discord</div><p class="bio">'+cr['Discord name']+'</p></div>';
     }
   } else {
     h = '<div style="text-align:center;padding:40px;color:#aaa"><div style="font-size:48px;margin-bottom:12px">🚪</div><p>現在入居者募集中</p></div>';
