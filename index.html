@@ -266,14 +266,15 @@ function openModal(roomNum){
 
   // 画像
   var imgCol = document.getElementById('mbody-img');
+  var imgHtml = '';
   if(cr && cr['MasterPiece画像']){
-    imgCol.innerHTML = '<img src="'+cr['MasterPiece画像']+'" alt="作品画像">';
-  } else {
-    imgCol.innerHTML = '';
+    imgHtml = '<img src="'+cr['MasterPiece画像']+'" alt="作品画像">';
   }
+  imgCol.innerHTML = imgHtml + '<div id="room-number-overlay">'+roomNum+'号室</div><button id="mclose-inner" onclick="document.getElementById(\'overlay\').classList.remove(\'open\')" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);cursor:pointer;font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;">✕</button>';
 
-  // 画像の上に部屋番号を大きく表示
-  document.getElementById('room-number-overlay').textContent = roomNum + '号室';
+  // 既存の#mcloseも念のため再バインド
+  var mc = document.getElementById('mclose');
+  if(mc) mc.onclick = function(){ document.getElementById('overlay').classList.remove('open'); };
 
   var h = '';
   if(cr){
