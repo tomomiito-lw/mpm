@@ -22,10 +22,14 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 @keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
 #mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
 #overlay.open #mbox{opacity:1;transform:translateY(0);}
-#mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #eee;flex-shrink:0;background:#fff;}
-#mhead-room{font-size:22px;font-weight:900;color:#191818;letter-spacing:0.02em;}
-#mclose{width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,0.1);cursor:pointer;font-size:14px;color:#191818;display:flex;align-items:center;justify-content:center;}
-#mclose:hover{background:rgba(0,0,0,0.2);}
+#mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #eee;flex-shrink:0;background:#fff;}
+#mhead-left{display:flex;align-items:center;gap:12px;}
+#mhead-room-label{font-size:11px;font-weight:700;color:#111;line-height:1.4;}
+#mhead-room{font-size:40px;font-weight:900;color:#111;line-height:1;letter-spacing:-0.02em;}
+#mhead-right{display:flex;flex-direction:column;align-items:center;gap:4px;}
+#mclose{background:#111;color:#fff;border:none;border-radius:100px;padding:8px 20px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;}
+#mclose:hover{background:#333;}
+#mclose-sub{font-size:11px;font-weight:700;color:#111;}
 #mbody{overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
 #mbody-img{width:100%;background:#000;flex-shrink:0;position:relative;}
 #room-svg-container{width:100%;display:block;}
@@ -87,8 +91,14 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 <div id="overlay">
   <div id="mbox">
     <div id="mhead">
-      <div id="mhead-room"></div>
-      <button id="mclose">✕</button>
+      <div id="mhead-left">
+        <div id="mhead-room-label">Room<br>No.</div>
+        <div id="mhead-room"></div>
+      </div>
+      <div id="mhead-right">
+        <button id="mclose">EXIT</button>
+        <div id="mclose-sub">お邪魔しました！</div>
+      </div>
     </div>
     <div id="mbody">
       <div id="mbody-img">
