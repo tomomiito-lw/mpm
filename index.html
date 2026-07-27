@@ -47,6 +47,32 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 /* 新入居通知 */
 #new-notice{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#f5c842;color:#191818;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
+
+/* 吹き出しツールチップ */
+#tooltip{
+  display:none;
+  position:fixed;
+  background:#191818;
+  color:#fff;
+  font-size:12px;
+  font-weight:600;
+  padding:5px 10px;
+  border-radius:8px;
+  pointer-events:none;
+  z-index:300;
+  white-space:nowrap;
+  transform:translate(-50%, -100%);
+  margin-top:-8px;
+}
+#tooltip::after{
+  content:'';
+  position:absolute;
+  top:100%;
+  left:50%;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:#191818;
+}
 </style>
 </head>
 <body>
@@ -76,6 +102,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 <div id="live-badge">● LIVE（5秒更新）</div>
 <div id="new-notice">✨ 新しいクリエイターが入居しました！</div>
+<div id="tooltip"></div>
 
 <script>
 (function(){
@@ -95,18 +122,28 @@ fetch('mansion_new.svg')
   });
 
 function initWindows(){
+  var tooltip = document.getElementById('tooltip');
   var wins = document.querySelectorAll('[id^="win-"]');
   wins.forEach(function(el){
+    var roomNum = el.id.replace('win-', '');
+    if(roomNum.indexOf('side') !== -1) return;
     el.style.cursor = 'default';
-    el.addEventListener('mouseenter', function(){
+
+    el.addEventListener('mouseenter', function(e){
       if(el.classList.contains('win-occupied')) el.classList.add('win-hover');
+      tooltip.textContent = roomNum + '号室';
+      tooltip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', function(e){
+      tooltip.style.left = e.clientX + 'px';
+      tooltip.style.top  = (e.clientY - 8) + 'px';
     });
     el.addEventListener('mouseleave', function(){
       el.classList.remove('win-hover');
+      tooltip.style.display = 'none';
     });
     el.addEventListener('click', function(){
       if(el.classList.contains('win-occupied')){
-        var roomNum = el.id.replace('win-', '');
         openModal(roomNum);
       }
     });
@@ -214,9 +251,9 @@ function openModal(roomNum){
   if(cr){
     if(cr['作者']) sub += cr['作者'];
     if(cr['制作年']) sub += (sub ? ' · ' : '') + cr['制作年'];
-    sub += (sub ? ' · ' : '') + tier+'階 · '+roomNum+'号室';
+    sub += (sub ? ' · ' : '') + roomNum+'号室';
   } else {
-    sub = tier+'階 · '+roomNum+'号室';
+    sub = roomNum+'号室';
   }
   document.getElementById('mtitle').textContent = title;
   document.getElementById('msub').textContent   = sub;
