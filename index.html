@@ -278,33 +278,27 @@ function openModal(roomNum){
 }
 
 function renderRoomSVG(container, imgSrc, artX, artY, artW, artH, svgH){
+  var pad = 10;
   var leftW = 203, rightStart = 1065, totalW = 1270;
-  var artPad = 10;
   var floorY = svgH - 80;
+  var bx = artX - pad, by = artY - pad, bw = artW + pad*2, bh = artH + pad*2;
 
   var s = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 '+totalW+' '+svgH+'">'
-    + '<defs><style>.cls-1{fill:#fff}.cls-2{fill:#ffffa0}</style></defs>'
-    // 白い壁（背景）
-    + '<rect class="cls-1" x="2.83" y="2.83" width="'+(totalW-5.66)+'" height="'+(svgH-5.66)+'"/>'
-    // 外枠
+    + '<defs><style>.r1{fill:#fff}.r2{fill:#ffffa0}</style></defs>'
+    + '<rect class="r1" x="0" y="0" width="'+totalW+'" height="'+svgH+'"/>'
     + '<rect x="0" y="0" width="'+totalW+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
-    // 床（黒い台形）
     + '<polygon points="'+totalW+' '+svgH+' '+rightStart+' '+floorY+' '+leftW+' '+floorY+' 0 '+svgH+'"/>'
-    // 左の黄色パネル
-    + '<polygon class="cls-2" points="0 '+svgH+' 0 0 '+leftW+' 0 '+leftW+' '+floorY+'"/>'
+    + '<polygon class="r2" points="0 '+svgH+' 0 0 '+leftW+' 0 '+leftW+' '+floorY+'"/>'
     + '<rect x="0" y="0" width="'+leftW+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
-    // 右の黄色パネル
-    + '<polygon class="cls-2" points="'+totalW+' '+svgH+' '+totalW+' 0 '+rightStart+' 0 '+rightStart+' '+floorY+'"/>'
+    + '<polygon class="r2" points="'+totalW+' '+svgH+' '+totalW+' 0 '+rightStart+' 0 '+rightStart+' '+floorY+'"/>'
     + '<rect x="'+rightStart+'" y="0" width="'+(totalW-rightStart)+'" height="'+svgH+'" fill="none" stroke="#000" stroke-width="5.67"/>'
-    // 作品（白背景＋borderのみ）
-    + '<rect x="'+(artX-artPad)+'" y="'+(artY-artPad)+'" width="'+(artW+artPad*2)+'" height="'+(artH+artPad*2)+'" fill="#fff" stroke="#000" stroke-width="3"/>';
+    + '<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="#fff" stroke="#000" stroke-width="3"/>';
 
   if(imgSrc){
     s += '<image href="'+imgSrc+'" x="'+artX+'" y="'+artY+'" width="'+artW+'" height="'+artH+'" preserveAspectRatio="xMidYMid meet"/>';
   } else {
     s += '<text x="'+(artX+artW/2)+'" y="'+(artY+artH/2)+'" fill="#aaa" font-size="36" text-anchor="middle" dominant-baseline="middle">No Image</text>';
   }
-
   s += '</svg>';
   container.innerHTML = s;
 }
