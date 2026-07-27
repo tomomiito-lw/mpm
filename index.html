@@ -279,7 +279,7 @@ function openModal(roomNum){
 
 function renderRoomSVG(container, imgSrc, artX, artY, artW, artH, svgH){
   var leftW = 203, rightStart = 1065, totalW = 1270;
-  // 黄色パネルの高さはsvgHに合わせる
+  var artPad = 10;
   var floorY = svgH - 80;
 
   var s = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 '+totalW+' '+svgH+'">'
