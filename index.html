@@ -56,7 +56,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   z-index:300;
   transform:translate(-50%, -100%);
   margin-top:-8px;
-  width:120px;
+  width:60px;
   text-align:center;
 }
 #tooltip svg{
@@ -70,7 +70,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   top:38%;
   left:50%;
   transform:translate(-50%, -50%);
-  font-size:13px;
+  font-size:9px;
   font-weight:700;
   color:#191818;
   white-space:nowrap;
@@ -135,9 +135,11 @@ function initWindows(){
     el.style.cursor = 'default';
 
     el.addEventListener('mouseenter', function(e){
-      if(el.classList.contains('win-occupied')) el.classList.add('win-hover');
-      document.getElementById('tooltip-text').textContent = roomNum + '号室';
-      tooltip.style.display = 'block';
+      if(el.classList.contains('win-occupied')){
+        el.classList.add('win-hover');
+        document.getElementById('tooltip-text').textContent = roomNum + '号室';
+        tooltip.style.display = 'block';
+      }
     });
     el.addEventListener('mousemove', function(e){
       tooltip.style.left = e.clientX + 'px';
