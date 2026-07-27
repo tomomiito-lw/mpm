@@ -257,7 +257,7 @@ function openModal(roomNum){
   var tier  = floor < 4 ? '低層' : floor < 7 ? '中層' : '高層';
 
   // ヘッダーに部屋番号
-  document.getElementById('mhead-room').textContent = roomNum + '号室';
+  document.getElementById('mhead-room').textContent = roomNum;
 
   // 部屋SVGに作品画像を埋め込む
   var roomContainer = document.getElementById('room-svg-container');
