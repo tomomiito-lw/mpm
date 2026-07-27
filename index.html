@@ -22,36 +22,14 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 @keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
 #mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
 #overlay.open #mbox{opacity:1;transform:translateY(0);}
+#mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #eee;flex-shrink:0;background:#191818;}
+#mhead-room{font-size:22px;font-weight:900;color:#fff;letter-spacing:0.02em;}
+#mclose{width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);cursor:pointer;font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;}
+#mclose:hover{background:rgba(255,255,255,0.35);}
 #mbody{overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
-#mbody-img{width:100%;background:#111;flex-shrink:0;position:relative;}
+#mbody-img{width:100%;background:#f0f0f0;flex-shrink:0;position:relative;}
 #mbody-img img{width:100%;max-height:320px;object-fit:contain;display:block;background:#f0f0f0;}
-#mbody-img .no-img{display:none;}
-#room-number-overlay{
-  position:absolute;
-  top:14px;
-  left:16px;
-  font-size:28px;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 2px 8px rgba(0,0,0,0.5);
-  letter-spacing:0.02em;
-  pointer-events:none;
-}
-#mclose{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:30px;height:30px;
-  border-radius:50%;
-  border:none;
-  background:rgba(0,0,0,0.4);
-  cursor:pointer;
-  font-size:14px;
-  color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);
-}
-#mclose:hover{background:rgba(0,0,0,0.6);}
+#room-number-overlay{display:none;}
 #mbody-info{padding:20px;}
 .cs{margin-bottom:18px;}
 .csh{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;}
@@ -107,11 +85,13 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 <div id="overlay">
   <div id="mbox">
+    <div id="mhead">
+      <div id="mhead-room"></div>
+      <button id="mclose">✕</button>
+    </div>
     <div id="mbody">
       <div id="mbody-img">
-        <span class="no-img"></span>
         <div id="room-number-overlay"></div>
-        <button id="mclose">✕</button>
       </div>
       <div id="mbody-info">
         <div id="creator-content"></div>
@@ -264,9 +244,12 @@ function openModal(roomNum){
   var unit  = parseInt(roomNum) % 100;
   var tier  = floor < 4 ? '低層' : floor < 7 ? '中層' : '高層';
 
+  // ヘッダーに部屋番号
+  document.getElementById('mhead-room').textContent = roomNum + '号室';
+
   // 画像
-  var imgEl = document.getElementById('mbody-img').querySelector('img');
   var imgCol = document.getElementById('mbody-img');
+  var imgEl = imgCol.querySelector('img');
   if(cr && cr['MasterPiece画像']){
     if(!imgEl){
       imgEl = document.createElement('img');
@@ -278,44 +261,27 @@ function openModal(roomNum){
   } else {
     if(imgEl) imgEl.style.display = 'none';
   }
-  // 部屋番号
-  document.getElementById('room-number-overlay').textContent = roomNum + '号室';
 
   var h = '';
   if(cr){
     // 作品名・作者・制作年
-    var meta = '';
-    if(cr['MasterPiece名']) meta += '<div style="font-size:20px;font-weight:700;color:#111;margin-bottom:4px;">'+cr['MasterPiece名']+'</div>';
-    if(cr['作者'] || cr['制作年']){
-      meta += '<div style="font-size:13px;color:#888;margin-bottom:16px;">';
-      if(cr['作者']) meta += cr['作者'];
-      if(cr['制作年']) meta += (cr['作者'] ? ' · ' : '') + cr['制作年'];
-      meta += '</div>';
-    }
-    h += meta;
-    // 作品概要
-    if(cr['作品概要']){
-      h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
-    }
-    // 自己紹介
-    if(cr['自己紹介']){
-      h += '<div class="cs"><div class="csh">作者について</div><p class="bio">'+cr['自己紹介']+'</p></div>';
-    }
+    if(cr['MasterPiece名']) h += '<div class="cs"><div class="csh">MasterPiece名</div><p class="bio" style="font-size:18px;font-weight:700;color:#111;">'+cr['MasterPiece名']+'</p></div>';
+    if(cr['作者'])          h += '<div class="cs"><div class="csh">作者</div><p class="bio">'+cr['作者']+'</p></div>';
+    if(cr['制作年'])        h += '<div class="cs"><div class="csh">制作年</div><p class="bio">'+cr['制作年']+'</p></div>';
+    if(cr['作品概要'])      h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
+    if(cr['自己紹介'])      h += '<div class="cs"><div class="csh">自己紹介</div><p class="bio">'+cr['自己紹介']+'</p></div>';
     // リンク
     var ls = [];
-    if(cr['URL'])             ls.push({i:'🎨', l:'作品URL',      u: cr['URL']});
-    if(cr['SNS：Instagram'])  ls.push({i:'📷', l:'Instagram',    u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
-    if(cr['SNS：Twitter'])    ls.push({i:'🐦', l:'Twitter / X', u: 'https://twitter.com/'+cr['SNS：Twitter'].replace('@','')});
-    if(cr['SNS：other'])      ls.push({i:'🔗', l:'その他SNS',   u: cr['SNS：other']});
+    if(cr['URL'])             ls.push({i:'🎨', l:'URL',            u: cr['URL']});
+    if(cr['SNS：Instagram'])  ls.push({i:'📷', l:'SNS：Instagram', u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
+    if(cr['SNS：Twitter'])    ls.push({i:'🐦', l:'SNS：Twitter',   u: 'https://twitter.com/'+cr['SNS：Twitter'].replace('@','')});
+    if(cr['SNS：other'])      ls.push({i:'🔗', l:'SNS：other',     u: cr['SNS：other']});
     if(ls.length){
       h += '<div class="cs"><div class="csh">リンク</div><div class="links">';
       ls.forEach(function(lk){ h += '<a class="lnk" href="'+lk.u+'" target="_blank" rel="noopener"><span class="lnk-i">'+lk.i+'</span>'+lk.l+'</a>'; });
       h += '</div></div>';
     }
-    // Discord
-    if(cr['Discord name']){
-      h += '<div class="cs"><div class="csh">Discord</div><p class="bio">'+cr['Discord name']+'</p></div>';
-    }
+    if(cr['Discord name']) h += '<div class="cs"><div class="csh">Discord name</div><p class="bio">'+cr['Discord name']+'</p></div>';
   } else {
     h = '<div style="text-align:center;padding:40px;color:#aaa"><div style="font-size:48px;margin-bottom:12px">🚪</div><p>現在入居者募集中</p></div>';
   }
