@@ -269,16 +269,23 @@ function openModal(roomNum){
         artH2 = maxH;
         artW2 = Math.round(maxH / ratio);
       }
-      // 横幅が縮んだ場合は中央に配置
-      var artX2 = Math.round((1270 - artW2) / 2);
-      renderRoomSVG(roomContainer, imgSrc, artX2, artY, artW2, artH2, 720);
+      // 壁エリア：x 203〜1065（幅862）、y 0〜640（床まで）
+      var wallCenterX = (203 + 1065) / 2;
+      var wallCenterY = 640 / 2;
+      var artX2 = Math.round(wallCenterX - artW2 / 2);
+      var artY2 = Math.round(wallCenterY - artH2 / 2);
+      renderRoomSVG(roomContainer, imgSrc, artX2, artY2, artW2, artH2, 720);
     };
     img.onerror = function(){
-      renderRoomSVG(roomContainer, imgSrc, artX, artY, artW, 450, 720);
+      var artX2 = Math.round((203 + 1065) / 2 - 331);
+      var artY2 = Math.round(640 / 2 - 225);
+      renderRoomSVG(roomContainer, imgSrc, artX2, artY2, 662, 450, 720);
     };
     img.src = imgSrc;
   } else {
-    renderRoomSVG(roomContainer, '', artX, artY, artW, 450, 720);
+    var artX2 = Math.round((203 + 1065) / 2 - 331);
+    var artY2 = Math.round(640 / 2 - 225);
+    renderRoomSVG(roomContainer, '', artX2, artY2, 662, 450, 720);
   }
 
   _openModalInfo(cr, roomNum);
