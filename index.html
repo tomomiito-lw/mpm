@@ -27,8 +27,9 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #mclose{width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,0.1);cursor:pointer;font-size:14px;color:#191818;display:flex;align-items:center;justify-content:center;}
 #mclose:hover{background:rgba(0,0,0,0.2);}
 #mbody{overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
-#mbody-img{width:100%;background:#f0f0f0;flex-shrink:0;position:relative;}
-#mbody-img img{width:100%;max-height:320px;object-fit:contain;display:block;background:#f0f0f0;}
+#mbody-img{width:100%;background:#000;flex-shrink:0;position:relative;}
+#room-svg-container{width:100%;display:block;}
+#room-svg-container svg{width:100%;height:auto;display:block;}
 #room-number-overlay{display:none;}
 #mbody-info{padding:20px;}
 .cs{margin-bottom:18px;}
@@ -92,6 +93,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
     <div id="mbody">
       <div id="mbody-img">
         <div id="room-number-overlay"></div>
+        <div id="room-svg-container"></div>
       </div>
       <div id="mbody-info">
         <div id="creator-content"></div>
@@ -247,20 +249,36 @@ function openModal(roomNum){
   // ヘッダーに部屋番号
   document.getElementById('mhead-room').textContent = roomNum + '号室';
 
-  // 画像
-  var imgCol = document.getElementById('mbody-img');
-  var imgEl = imgCol.querySelector('img');
-  if(cr && cr['MasterPiece画像']){
-    if(!imgEl){
-      imgEl = document.createElement('img');
-      imgEl.alt = '作品画像';
-      imgCol.insertBefore(imgEl, imgCol.firstChild);
-    }
-    imgEl.src = cr['MasterPiece画像'];
-    imgEl.style.display = 'block';
-  } else {
-    if(imgEl) imgEl.style.display = 'none';
-  }
+  // 部屋SVGに作品画像を埋め込む
+  var roomContainer = document.getElementById('room-svg-container');
+  var imgSrc = (cr && cr['MasterPiece画像']) ? cr['MasterPiece画像'] : '';
+
+  // 作品画像エリア：x:253〜1015, y:30〜571（中央壁の内側にマージンを持たせる）
+  var artX = 303, artY = 50, artW = 662, artH = 500;
+
+  var svgContent = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1270 720">'
+    + '<defs><style>.cls-1{fill:#fff}.cls-2{fill:#ffffa0}</style></defs>'
+    // 白い壁（背景）
+    + '<rect class="cls-1" x="2.83" y="2.83" width="1264.33" height="712.3"/>'
+    // 枠線
+    + '<path d="M1270,717.97H0V0h1270v717.97ZM5.67,712.3h1258.66V5.67H5.67v706.63Z"/>'
+    // 床（黒い台形）
+    + '<polygon points="1265.8 715.13 1065.63 601.33 203 601.33 2.83 715.13 1265.8 715.13"/>'
+    // 左の黄色パネル
+    + '<polygon class="cls-2" points="2.83 715.13 2.83 2.83 203 2.83 203 601.33 2.83 715.13"/>'
+    + '<path d="M0,720V0h205.83v602.98l-1.43.81L0,720ZM5.67,5.67v704.59l194.5-110.58V5.67H5.67Z"/>'
+    // 右の黄色パネル
+    + '<polygon class="cls-2" points="1265.8 715.13 1265.8 2.83 1065.63 2.83 1065.63 601.33 1265.8 715.13"/>'
+    + '<path d="M1268.63,720l-205.84-117.02V0h205.84v720ZM1068.46,599.68l194.5,110.58V5.67h-194.5v594.01Z"/>'
+    // 作品画像（額縁つき）
+    + (imgSrc
+      ? '<rect x="'+(artX-8)+'" y="'+(artY-8)+'" width="'+(artW+16)+'" height="'+(artH+16)+'" fill="#111"/>'
+        + '<image href="'+imgSrc+'" x="'+artX+'" y="'+artY+'" width="'+artW+'" height="'+artH+'" preserveAspectRatio="xMidYMid meet"/>'
+      : '<rect x="'+(artX-8)+'" y="'+(artY-8)+'" width="'+(artW+16)+'" height="'+(artH+16)+'" fill="#333"/>'
+        + '<text x="'+(artX+artW/2)+'" y="'+(artY+artH/2)+'" fill="#888" font-size="40" text-anchor="middle" dominant-baseline="middle">No Image</text>')
+    + '</svg>';
+
+  roomContainer.innerHTML = svgContent;
 
   var h = '';
   if(cr){
