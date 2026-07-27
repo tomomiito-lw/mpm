@@ -22,17 +22,36 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 @keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
 #mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
 #overlay.open #mbox{opacity:1;transform:translateY(0);}
-#mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid #eee;flex-shrink:0;}
-#mhead-left{display:flex;align-items:center;gap:12px;}
-#mhead-avatar{display:none;}
-#mtitle{font-size:15px;font-weight:700;color:#111;}
-#msub{font-size:11px;color:#888;margin-top:2px;}
-#mclose{width:30px;height:30px;border-radius:50%;border:1px solid #ddd;background:#f5f5f5;cursor:pointer;font-size:14px;color:#555;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#mclose:hover{background:#eee;}
 #mbody{overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
-#mbody-img{width:100%;background:#111;flex-shrink:0;}
+#mbody-img{width:100%;background:#111;flex-shrink:0;position:relative;}
 #mbody-img img{width:100%;max-height:320px;object-fit:contain;display:block;background:#f0f0f0;}
 #mbody-img .no-img{display:none;}
+#room-number-overlay{
+  position:absolute;
+  top:14px;
+  left:16px;
+  font-size:28px;
+  font-weight:900;
+  color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  letter-spacing:0.02em;
+  pointer-events:none;
+}
+#mclose{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:30px;height:30px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,0.4);
+  cursor:pointer;
+  font-size:14px;
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+#mclose:hover{background:rgba(0,0,0,0.6);}
 #mbody-info{padding:20px;}
 .cs{margin-bottom:18px;}
 .csh{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;}
@@ -88,18 +107,12 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 <div id="overlay">
   <div id="mbox">
-    <div id="mhead">
-      <div id="mhead-left">
-        <img id="mhead-avatar" src="" alt="">
-        <div>
-          <div id="mtitle"></div>
-          <div id="msub"></div>
-        </div>
-      </div>
-      <button id="mclose">✕</button>
-    </div>
     <div id="mbody">
-      <div id="mbody-img"><span class="no-img"></span></div>
+      <div id="mbody-img">
+        <span class="no-img"></span>
+        <div id="room-number-overlay"></div>
+        <button id="mclose">✕</button>
+      </div>
       <div id="mbody-info">
         <div id="creator-content"></div>
       </div>
@@ -259,21 +272,25 @@ function openModal(roomNum){
     imgCol.innerHTML = '';
   }
 
-  // ヘッダー：作品名 + 作者
-  var title = cr ? (cr['MasterPiece名'] || '作品名未設定') : floor+'階 '+unit+'号室';
-  var sub = '';
-  if(cr){
-    if(cr['作者']) sub += cr['作者'];
-    if(cr['制作年']) sub += (sub ? ' · ' : '') + cr['制作年'];
-    sub += (sub ? ' · ' : '') + roomNum+'号室';
-  } else {
-    sub = roomNum+'号室';
-  }
-  document.getElementById('mtitle').textContent = title;
-  document.getElementById('msub').textContent   = sub;
+  // 画像の上に部屋番号を大きく表示
+  document.getElementById('room-number-overlay').textContent = roomNum + '号室';
+
+  // mtitle/msubは非表示（使わない）
+  if(document.getElementById('mtitle')) document.getElementById('mtitle').textContent = '';
+  if(document.getElementById('msub')) document.getElementById('msub').textContent = '';
 
   var h = '';
   if(cr){
+    // 作品名・作者・制作年
+    var meta = '';
+    if(cr['MasterPiece名']) meta += '<div style="font-size:20px;font-weight:700;color:#111;margin-bottom:4px;">'+cr['MasterPiece名']+'</div>';
+    if(cr['作者'] || cr['制作年']){
+      meta += '<div style="font-size:13px;color:#888;margin-bottom:16px;">';
+      if(cr['作者']) meta += cr['作者'];
+      if(cr['制作年']) meta += (cr['作者'] ? ' · ' : '') + cr['制作年'];
+      meta += '</div>';
+    }
+    h += meta;
     // 作品概要
     if(cr['作品概要']){
       h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
