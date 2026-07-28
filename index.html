@@ -333,8 +333,7 @@ function _openModalInfo(cr, roomNum){
     if(cr['MasterPiece名']) h += '<div class="cs"><div class="csh">MasterPiece名</div><p class="bio" style="font-size:18px;font-weight:700;color:#111;">'+cr['MasterPiece名']+'</p></div>';
     if(cr['作者'])          h += '<div class="cs"><div class="csh">作者</div><p class="bio">'+cr['作者']+'</p></div>';
     if(cr['制作年'])        h += '<div class="cs"><div class="csh">制作年</div><p class="bio">'+cr['制作年']+'</p></div>';
-    if(cr['作品概要'])      h += '<div class="cs"><div class="csh">作品概要</div><p class="bio">'+cr['作品概要']+'</p></div>';
-    if(cr['自己紹介'])      h += '<div class="cs"><div class="csh">自己紹介</div><p class="bio">'+cr['自己紹介']+'</p></div>';
+    if(cr['セールスポイント']) h += '<div class="cs"><div class="csh">セールスポイント</div><p class="bio">'+cr['セールスポイント']+'</p></div>';
     var ls = [];
     if(cr['URL'])             ls.push({i:'🎨', l:'URL',            u: cr['URL']});
     if(cr['SNS：Instagram'])  ls.push({i:'📷', l:'SNS：Instagram', u: 'https://instagram.com/'+cr['SNS：Instagram'].replace('@','')});
@@ -345,7 +344,6 @@ function _openModalInfo(cr, roomNum){
       ls.forEach(function(lk){ h += '<a class="lnk" href="'+lk.u+'" target="_blank" rel="noopener"><span class="lnk-i">'+lk.i+'</span>'+lk.l+'</a>'; });
       h += '</div></div>';
     }
-    if(cr['Discord name']) h += '<div class="cs"><div class="csh">Discord name</div><p class="bio">'+cr['Discord name']+'</p></div>';
   } else {
     h = '<div style="text-align:center;padding:40px;color:#aaa"><div style="font-size:48px;margin-bottom:12px">🚪</div><p>現在入居者募集中</p></div>';
   }
