@@ -17,7 +17,26 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;}
 
-#stage{position:relative;width:100vw;max-width:478px;}
+/* ─── ローディングアニメーション ─── */
+#loader{position:fixed;inset:0;z-index:500;background:#235f62;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity 0.5s ease 0.3s;}
+#loader.done{opacity:0;pointer-events:none;}
+#loader-content{position:relative;width:min(320px,78vw);}
+#loader-moon{
+  position:absolute;width:55%;aspect-ratio:1;background:#ef743f;border-radius:50%;
+  top:-10%;left:5%;
+  animation:moonFloat 1.4s ease-in-out infinite alternate;
+}
+#loader-text{
+  position:relative;z-index:1;color:#fff;
+  font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;
+  font-weight:900;line-height:1.05;
+  font-size:clamp(44px,11vw,72px);
+  padding:55% 0 0 0;
+}
+@keyframes moonFloat{from{transform:translateY(0);}to{transform:translateY(-14px);}}
+
+#stage{position:relative;width:100vw;max-width:478px;opacity:0;transition:opacity 0.6s ease;}
+#stage.visible{opacity:1;}
 #stage svg{width:100%;height:auto;display:block;}
 
 /* 空き室：#666161（SVGデフォルト）、入居者：黄色 */
@@ -95,6 +114,14 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 </head>
 <body>
 
+<!-- ローディング画面 -->
+<div id="loader">
+  <div id="loader-content">
+    <div id="loader-moon"></div>
+    <div id="loader-text">The<br>Masterpiece<br>Mansion</div>
+  </div>
+</div>
+
 <div id="stage"></div>
 
 <div id="overlay">
@@ -144,6 +171,11 @@ fetch('mansion_new.svg')
     initWindows();
     startPolling();
   });
+
+function hideLoader(){
+  document.getElementById('stage').classList.add('visible');
+  document.getElementById('loader').classList.add('done');
+}
 
 // タッチデバイスではツールチップ無効
 var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
@@ -224,8 +256,13 @@ function loadRoomData(){
       firstLoad = false;
       applyOccupancy();
       if(hasNew) showNotice();
+      hideLoader();
     })
-    .catch(function(){ applyOccupancy(); });
+    .catch(function(){
+      firstLoad = false;
+      applyOccupancy();
+      hideLoader();
+    });
 }
 
 function showNotice(){
