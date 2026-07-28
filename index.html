@@ -17,27 +17,44 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;}
 
-/* ─── ローディングアニメーション ─── */
-#loader{position:fixed;inset:0;z-index:500;background:#235f62;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity 0.5s ease 0.3s;}
-#loader.done{opacity:0;pointer-events:none;}
-#loader-content{position:relative;width:min(320px,78vw);}
-#loader-moon{
-  position:absolute;width:55%;aspect-ratio:1;background:#ef743f;border-radius:50%;
-  top:-10%;left:5%;
-  animation:moonFloat 1.4s ease-in-out infinite alternate;
+/* ─── ローディングオーバーレイ ─── */
+#loader{
+  position:fixed;inset:0;z-index:500;
+  background:#235f62;
+  pointer-events:none;
+  transition:opacity 0.6s ease;
 }
-#loader-text{
-  position:relative;z-index:1;color:#fff;
-  font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;
-  font-weight:900;line-height:1.05;
-  font-size:clamp(44px,11vw,72px);
-  padding:55% 0 0 0;
-}
-@keyframes moonFloat{from{transform:translateY(0);}to{transform:translateY(-14px);}}
+#loader.done{opacity:0;}
 
-#stage{position:relative;width:100vw;max-width:478px;opacity:0;transition:opacity 0.6s ease;}
+/* ロゴ（左からフェードイン） */
+#intro-logo{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:501;
+  color:#fff;
+  font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;
+  font-weight:900;
+  line-height:1.05;
+  font-size:clamp(44px,12vw,80px);
+  opacity:0;
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+/* ─── SVGの月・ビルアニメーション ─── */
+#stage{position:relative;width:100vw;max-width:478px;opacity:0;}
 #stage.visible{opacity:1;}
 #stage svg{width:100%;height:auto;display:block;}
+
+/* 月：左から外れた位置からスライドイン */
+#stage .anim-moon{
+  transform:translateX(-200px);
+  transition:transform 0.9s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+#stage.anim-moon-in .anim-moon{
+  transform:translateX(0);
+}
 
 /* 空き室：#666161（SVGデフォルト）、入居者：黄色 */
 .win-occupied{fill:#f5c842 !important;}
@@ -114,13 +131,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 </head>
 <body>
 
-<!-- ローディング画面 -->
-<div id="loader">
-  <div id="loader-content">
-    <div id="loader-moon"></div>
-    <div id="loader-text">The<br>Masterpiece<br>Mansion</div>
-  </div>
-</div>
+<!-- ローディングオーバーレイ -->
+<div id="loader"></div>
+<!-- イントロロゴ -->
+<div id="intro-logo">The<br>Masterpiece<br>Mansion</div>
 
 <div id="stage"></div>
 
@@ -168,13 +182,78 @@ fetch('mansion_new.svg')
   .then(function(r){ return r.text(); })
   .then(function(svgText){
     document.getElementById('stage').innerHTML = svgText;
+    // 月の要素にクラスを付与
+    var moon = document.querySelector('#stage .cls-2');
+    if(moon) moon.classList.add('anim-moon');
+    // ビル（cls-3）に初期非表示
+    var building = document.querySelector('#stage .cls-3');
+    if(building) building.style.opacity = '0';
     initWindows();
     startPolling();
+    runIntroAnimation();
   });
 
+function runIntroAnimation(){
+  var logo    = document.getElementById('intro-logo');
+  var loader  = document.getElementById('loader');
+  var stage   = document.getElementById('stage');
+  var building= document.querySelector('#stage .cls-3');
+  var moon    = document.querySelector('#stage .anim-moon');
+
+  // STEP1: 緑の画面（0.4秒待機）
+  setTimeout(function(){
+
+    // STEP2: ロゴが左からフェードイン
+    logo.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    logo.style.transform  = 'translate(-50%,-50%)';
+    logo.style.opacity    = '1';
+
+    setTimeout(function(){
+
+      // STEP3: ビルを表示、ロゴが定位置に縮小
+      // SVGのロゴ位置を特定（左上 約top:5% left:5%）
+      var stageEl  = stage.getBoundingClientRect();
+      // ロゴのSVG内位置（SVG viewBox 0 0 478.8 801.28 内でy≈30-150, x≈30-240）
+      // 画面上の実際の位置を計算
+      var scaleX   = stageEl.width  / 478.8;
+      var scaleY   = stageEl.height / 801.28;
+      var logoTargX = stageEl.left + 30 * scaleX;
+      var logoTargY = stageEl.top  + 30 * scaleY;
+      var vpCX = window.innerWidth  / 2;
+      var vpCY = window.innerHeight / 2;
+      var dx = logoTargX - vpCX;
+      var dy = logoTargY - vpCY;
+      var scale = Math.min(scaleX, scaleY) * 0.55;
+
+      stage.style.opacity   = '1';
+      if(building){ building.style.transition='opacity 0.5s ease'; building.style.opacity='1'; }
+
+      logo.style.transition = 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)';
+      logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
+
+      setTimeout(function(){
+        logo.style.opacity = '0';
+
+        // STEP4: 月がビルの裏からスライドイン
+        setTimeout(function(){
+          stage.classList.add('anim-moon-in');
+
+          // ローダーフェードアウト
+          setTimeout(function(){
+            loader.classList.add('done');
+          }, 600);
+
+        }, 200);
+
+      }, 900);
+
+    }, 1000);
+
+  }, 400);
+}
+
 function hideLoader(){
-  document.getElementById('stage').classList.add('visible');
-  document.getElementById('loader').classList.add('done');
+  // GASデータ取得完了 → 特に何もしない（アニメーションは独立）
 }
 
 // タッチデバイスではツールチップ無効
