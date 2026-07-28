@@ -248,31 +248,28 @@ function runIntroAnimation(){
       stage.style.opacity   = '1';
       if(building){ building.style.transition='opacity 0.5s ease'; building.style.opacity='1'; }
 
-      logo.style.transition = 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.4,0,0.2,1)';
+      logo.style.transition = 'transform 0.9s cubic-bezier(0.4,0,0.2,1)';
       logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
 
       setTimeout(function(){
         // SVGのロゴを表示してオーバーレイロゴを瞬時に隠す
         var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
         svgLogoGroups.forEach(function(g){
-          g.style.transition = 'opacity 0s';
+          g.style.transition = 'none';
           g.style.opacity = '1';
         });
-        logo.style.transition = 'opacity 0s';
+        logo.style.transition = 'none';
         logo.style.opacity = '0';
 
         // STEP4: 月がビルの裏からスライドイン
         setTimeout(function(){
           stage.classList.add('anim-moon-in');
-
-          // ローダーフェードアウト
           setTimeout(function(){
             loader.classList.add('done');
-          }, 600);
+          }, 700);
+        }, 150);
 
-        }, 200);
-
-      }, 900);
+      }, 950);
 
     }, 1000);
 
