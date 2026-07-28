@@ -50,7 +50,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 /* 月：左から外れた位置からスライドイン */
 #stage .anim-moon{
   transform:translateX(-200px);
-  transition:transform 0.9s cubic-bezier(0.25,0.46,0.45,0.94);
+  transition:transform 1.6s cubic-bezier(0.25,0.46,0.45,0.94);
 }
 #stage.anim-moon-in .anim-moon{
   transform:translateX(0);
@@ -203,52 +203,41 @@ function runIntroAnimation(){
   var building= document.querySelector('#stage .cls-3');
   var moon    = document.querySelector('#stage .anim-moon');
 
-  // STEP1: 緑の画面（0.4秒待機）
+  // STEP1: 緑の画面（1.0秒待機）
   setTimeout(function(){
 
-    // STEP2: ロゴが左からフェードイン
-    logo.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    // STEP2: ロゴが左からフェードイン（1.4秒）
+    logo.style.transition = 'opacity 1.4s ease, transform 1.4s ease';
     logo.style.transform  = 'translate(-50%,-50%)';
     logo.style.opacity    = '1';
 
     setTimeout(function(){
 
       // STEP3: ビルを表示、ロゴが定位置に縮小
-      // SVGのロゴ位置を特定（左上 約top:5% left:5%）
       var stageEl  = stage.getBoundingClientRect();
       var scaleX   = stageEl.width  / 478.8;
       var scaleY   = stageEl.height / 801.28;
-
-      // SVG内のロゴ位置（viewBox座標）→ 画面座標
-      // ロゴテキストはSVG内 x≈30, y≈30 あたりから始まる
       var svgLogoX = 30, svgLogoY = 30;
       var logoTargX = stageEl.left + svgLogoX * scaleX;
       var logoTargY = stageEl.top  + svgLogoY * scaleY;
-
-      // 現在のintro-logoの中心座標（画面中央）
       var vpCX = window.innerWidth  / 2;
       var vpCY = window.innerHeight / 2;
-
-      // intro-logoはtransform-origin: center なので
-      // translate後の左上がlogoTargになるよう計算
       var logoEl   = logo;
       var logoW    = logoEl.offsetWidth;
       var logoH    = logoEl.offsetHeight;
       var scale    = Math.min(stageEl.width / 478.8, 1) * 0.5;
-
-      // 縮小後のロゴの左上がlogoTargに来るようにdx/dyを計算
       var scaledW  = logoW * scale;
       var scaledH  = logoH * scale;
-      // 縮小後の中心位置
       var targetCX = logoTargX + scaledW / 2;
       var targetCY = logoTargY + scaledH / 2;
       var dx = targetCX - vpCX;
       var dy = targetCY - vpCY;
 
       stage.style.opacity   = '1';
-      if(building){ building.style.transition='opacity 0.5s ease'; building.style.opacity='1'; }
+      if(building){ building.style.transition='opacity 1.2s ease'; building.style.opacity='1'; }
 
-      logo.style.transition = 'transform 0.9s cubic-bezier(0.4,0,0.2,1)';
+      // ロゴ移動（1.8秒）
+      logo.style.transition = 'transform 1.8s cubic-bezier(0.4,0,0.2,1)';
       logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
 
       setTimeout(function(){
@@ -262,14 +251,14 @@ function runIntroAnimation(){
             // ローダーフェードアウト前にロゴをbodyに移動して残す
             document.body.appendChild(logo);
             loader.classList.add('done');
-          }, 700);
-        }, 150);
+          }, 1200);
+        }, 300);
 
-      }, 950);
+      }, 1900);  // ロゴ移動完了まで待機
 
-    }, 1000);
+    }, 2000);    // STEP2ロゴ表示の尺
 
-  }, 400);
+  }, 1000);      // STEP1 緑の画面待機
 }
 
 function hideLoader(){
