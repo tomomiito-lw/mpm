@@ -219,13 +219,13 @@ function runIntroAnimation(){
       var scaleY   = stageEl.height / 801.28;
       var svgLogoX = 30, svgLogoY = 30;
       var logoTargX = stageEl.left + svgLogoX * scaleX;
-      var logoTargY = stageEl.top  + svgLogoY * scaleY - 5;
+      var logoTargY = stageEl.top  + svgLogoY * scaleY - 8;
       var vpCX = window.innerWidth  / 2;
       var vpCY = window.innerHeight / 2;
       var logoEl   = logo;
       var logoW    = logoEl.offsetWidth;
       var logoH    = logoEl.offsetHeight;
-      var scale    = Math.min(stageEl.width / 478.8, 1) * 0.5;
+      var scale    = Math.min(stageEl.width / 478.8, 1) * 0.45;
       var scaledW  = logoW * scale;
       var scaledH  = logoH * scale;
       var targetCX = logoTargX + scaledW / 2;
@@ -237,7 +237,7 @@ function runIntroAnimation(){
       if(building){ building.style.transition='opacity 1.2s ease'; building.style.opacity='1'; }
 
       // ロゴ移動（1.8秒）
-      logo.style.transition = 'transform 1.8s cubic-bezier(0.4,0,0.2,1)';
+      logo.style.transition = 'transform 1.1s cubic-bezier(0.4,0,0.2,1)';
       logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
 
       setTimeout(function(){
@@ -254,7 +254,7 @@ function runIntroAnimation(){
           }, 1200);
         }, 300);
 
-      }, 1900);  // ロゴ移動完了まで待機
+      }, 1200);  // ロゴ移動完了まで待機
 
     }, 3200);    // STEP2ロゴ表示の尺
 
