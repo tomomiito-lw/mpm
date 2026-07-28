@@ -61,7 +61,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 .win-hover{fill:#f5d442 !important;cursor:pointer;}
 
 /* モーダル */
-#overlay{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,0);}
+#overlay{display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,0);}
 #overlay.open{display:flex;animation:fadeOverlay 0.3s ease forwards;}
 @keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
 #mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
