@@ -188,9 +188,9 @@ fetch('mansion_new.svg')
     // ビル（cls-3）に初期非表示
     var building = document.querySelector('#stage .cls-3');
     if(building) building.style.opacity = '0';
-    // SVGのロゴテキスト（cls-4グループ）を初期非表示
-    var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
-    svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
+      // SVGのロゴテキスト（cls-4グループ）を初期非表示
+      var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
+      svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
     initWindows();
     startPolling();
     runIntroAnimation();
@@ -252,19 +252,15 @@ function runIntroAnimation(){
       logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
 
       setTimeout(function(){
-        // SVGのロゴを表示してオーバーレイロゴを瞬時に隠す
-        var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
-        svgLogoGroups.forEach(function(g){
-          g.style.transition = 'none';
-          g.style.opacity = '1';
-        });
-        logo.style.transition = 'none';
-        logo.style.opacity = '0';
+        // SVGのロゴはそのまま非表示のまま
+        // オーバーレイロゴが定位置に残る
 
         // STEP4: 月がビルの裏からスライドイン
         setTimeout(function(){
           stage.classList.add('anim-moon-in');
           setTimeout(function(){
+            // ローダーフェードアウト前にロゴをbodyに移動して残す
+            document.body.appendChild(logo);
             loader.classList.add('done');
           }, 700);
         }, 150);
