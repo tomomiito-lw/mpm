@@ -33,7 +33,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #eee;flex-shrink:0;background:#fff;}
 #mhead-left{display:flex;align-items:center;gap:12px;}
 #mhead-room-label{font-size:11px;font-weight:700;color:#111;line-height:1.4;}
-#mhead-room{font-size:40px;font-weight:900;color:#111;line-height:1;letter-spacing:-0.02em;}
+#mhead-room{font-size:64px;font-weight:900;color:#111;line-height:1;letter-spacing:-0.02em;}
 #mhead-right{display:flex;flex-direction:column;align-items:center;gap:4px;}
 #mclose{background:#111;color:#fff;border:none;border-radius:100px;padding:8px 20px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;}
 #mclose:hover{background:#333;}
@@ -46,7 +46,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #mbody-info{padding:20px;}
 .cs{margin-bottom:18px;}
 .csh{font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;}
-.bio{font-size:13px;color:#333;line-height:1.7;}
+.bio{font-size:13px;color:#333;line-height:1.7;font-weight:700;}
 .tags{display:flex;flex-wrap:wrap;gap:5px;}
 .tag{background:#f0f0f0;color:#555;font-size:12px;padding:3px 10px;border-radius:20px;}
 .links{display:flex;flex-direction:column;gap:7px;}
@@ -144,6 +144,9 @@ fetch('mansion_new.svg')
     startPolling();
   });
 
+// タッチデバイスではツールチップ無効
+var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
 function initWindows(){
   var tooltip = document.getElementById('tooltip');
   var wins = document.querySelectorAll('[id^="win-"]');
@@ -152,23 +155,26 @@ function initWindows(){
     if(roomNum.indexOf('side') !== -1) return;
     el.style.cursor = 'default';
 
-    el.addEventListener('mouseenter', function(e){
-      if(el.classList.contains('win-occupied')){
-        el.classList.add('win-hover');
-        document.getElementById('tooltip-text').textContent = roomNum + '号室';
-        tooltip.style.display = 'block';
-        setTimeout(function(){ tooltip.classList.add('show'); }, 10);
-      }
-    });
-    el.addEventListener('mousemove', function(e){
-      tooltip.style.left = e.clientX + 'px';
-      tooltip.style.top  = (e.clientY - 8) + 'px';
-    });
-    el.addEventListener('mouseleave', function(){
-      el.classList.remove('win-hover');
-      tooltip.classList.remove('show');
-      setTimeout(function(){ tooltip.style.display = 'none'; }, 200);
-    });
+    if(!isTouch){
+      el.addEventListener('mouseenter', function(e){
+        if(el.classList.contains('win-occupied')){
+          el.classList.add('win-hover');
+          document.getElementById('tooltip-text').textContent = roomNum + '号室';
+          tooltip.style.display = 'block';
+          setTimeout(function(){ tooltip.classList.add('show'); }, 10);
+        }
+      });
+      el.addEventListener('mousemove', function(e){
+        tooltip.style.left = e.clientX + 'px';
+        tooltip.style.top  = (e.clientY - 8) + 'px';
+      });
+      el.addEventListener('mouseleave', function(){
+        el.classList.remove('win-hover');
+        tooltip.classList.remove('show');
+        setTimeout(function(){ tooltip.style.display = 'none'; }, 200);
+      });
+    }
+
     el.addEventListener('click', function(){
       if(el.classList.contains('win-occupied')){
         openModal(roomNum);
