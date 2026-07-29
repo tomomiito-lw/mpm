@@ -211,9 +211,15 @@ function runIntroAnimation(){
     logo.style.transform  = 'translate(-50%,-50%)';
     logo.style.opacity    = '1';
 
+    // ビルの登場はロゴの尺と切り離し、1秒早く単独でフェードイン
+    setTimeout(function(){
+      stage.style.opacity = '1';
+      if(building){ building.style.transition='opacity 0.8s ease'; building.style.opacity='1'; }
+    }, 2500);
+
     setTimeout(function(){
 
-      // STEP3: ビルを表示、ロゴが定位置に縮小
+      // STEP3: ロゴが定位置に縮小
       var stageEl  = stage.getBoundingClientRect();
       var scaleX   = stageEl.width  / 478.8;
       var scaleY   = stageEl.height / 801.28;
@@ -233,15 +239,8 @@ function runIntroAnimation(){
       var dx = targetCX - vpCX;
       var dy = targetCY - vpCY;
 
-      stage.style.opacity = '1';
-
       logo.style.transition = 'transform 1.1s cubic-bezier(0.4,0,0.2,1)';
       logo.style.transform  = 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale('+scale+')';
-
-      // ロゴ移動開始と同時にビルをフェードイン
-      setTimeout(function(){
-        if(building){ building.style.transition='opacity 0.8s ease'; building.style.opacity='1'; }
-      }, 300);
 
       setTimeout(function(){
         // SVGのロゴはそのまま非表示のまま
@@ -259,7 +258,7 @@ function runIntroAnimation(){
 
       }, 1200);  // ロゴ移動完了まで待機
 
-    }, 1200);    // STEP2ロゴ表示の尺
+    }, 3200);    // STEP2ロゴ表示の尺
 
   }, 1000);      // STEP1 緑の画面待機
 }
