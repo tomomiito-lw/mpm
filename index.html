@@ -94,9 +94,6 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 .lnk:hover{background:#eee;}
 .lnk-i{font-size:15px;width:18px;text-align:center;}
 
-/* LIVE バッジ */
-#live-badge{display:none;position:fixed;top:16px;right:16px;background:#f5c842;color:#191818;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;z-index:200;}
-
 /* 新入居通知 */
 #new-notice{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#f5c842;color:#191818;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
 
@@ -242,7 +239,6 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   </div>
 </div>
 
-<div id="live-badge">● LIVE（5秒更新）</div>
 <div id="new-notice">✨ 新しいクリエイターが入居しました！</div>
 <div id="tooltip">
   <svg enable-background="new 0 0 800 574.943" viewBox="0 0 800 574.943" xmlns="http://www.w3.org/2000/svg"><path d="m264.156 445.155s35.975.445 74.477.615c-12.329 50.563-42.204 114.8-42.204 114.8s64.604-56.112 99.22-114.858c10.81-.104 19.97-.279 26.197-.557 216.944-9.641 395.361-194.394 351.466-326.08-34.703-104.11-308.644-137.234-554.964-68.978-246.322 68.254-297.861 376.246 45.808 395.058z" fill="#fff"/></svg>
@@ -459,7 +455,6 @@ var POLL   = isLive ? 5000 : 300000;
 function startPolling(){
   loadRoomData();
   setInterval(loadRoomData, POLL);
-  if(isLive) document.getElementById('live-badge').style.display = 'block';
 }
 
 // モーダル
