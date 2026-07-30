@@ -26,7 +26,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 }
 #loader.done{opacity:0;}
 
-/* ロゴ（左からフェードイン） */
+/* ロゴ（定位置で左から右にスライドイン＝ワイプ表示） */
 #intro-logo{
   position:fixed;
   top:50%;left:50%;
@@ -37,7 +37,9 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   font-weight:900;
   line-height:1.05;
   font-size:clamp(44px,12vw,80px);
-  opacity:0;
+  opacity:1;
+  -webkit-clip-path:inset(0 100% 0 0);
+  clip-path:inset(0 100% 0 0);
   pointer-events:none;
   white-space:nowrap;
 }
@@ -210,10 +212,10 @@ function runIntroAnimation(){
   // STEP1: 緑の画面（1.0秒待機）
   setTimeout(function(){
 
-    // STEP2: ロゴが左からフェードイン（1.4秒）
-    logo.style.transition = 'opacity 2.8s ease, transform 2.8s ease';
-    logo.style.transform  = 'translate(-50%,-50%)';
-    logo.style.opacity    = '1';
+    // STEP2: ロゴが左から右にスライドイン（ワイプ、位置は固定）
+    logo.style.transition = '-webkit-clip-path 2.8s ease, clip-path 2.8s ease';
+    logo.style.webkitClipPath = 'inset(0 0 0 0)';
+    logo.style.clipPath = 'inset(0 0 0 0)';
 
     // ビルの登場はロゴの尺と切り離し、1秒早く単独でフェードイン
     setTimeout(function(){
