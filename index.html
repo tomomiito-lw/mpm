@@ -626,15 +626,17 @@ function openZoomMode(){
     content.appendChild(logoEl);
   }
   if(logoEl){
-    // 位置の基準点はマンションの拡大率に合わせてスケール、
-    // ロゴ自体の見た目（文字サイズ・縮小率0.48）はノーマル時と完全に同じにする
+    // ノーマル時のロゴ縮小率は常に (実際の表示幅/478.8) * 0.48 になる
+    // （max-width:478pxでキャップされているため、常にこの式になる）。
+    // マンション自体がposScale倍に拡大されているので、ロゴも同じ比率を保つよう
+    // 縮小率を posScale * 0.48 にする（位置の基準点も同じposScaleを使う）。
     var posScale = ZOOM_WIDTH / 478.8;
     logoEl.style.position       = 'absolute';
     logoEl.style.left           = (30 * posScale) + 'px';
     logoEl.style.top            = (30 * posScale - 8) + 'px';
     logoEl.style.fontSize       = '';
     logoEl.style.transformOrigin = '0 0';
-    logoEl.style.transform      = 'scale(0.48)';
+    logoEl.style.transform      = 'scale(' + (0.48 * posScale) + ')';
   }
 
   document.getElementById('zoom-overlay').classList.add('open');
