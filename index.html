@@ -190,6 +190,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   max-width:none;
   margin:0 auto;
   transform:scale(0.55);
+  transform-origin:50% 0%;
   transition:transform 0.45s cubic-bezier(0.2,0.6,0.3,1);
 }
 #zoom-overlay.open #zoom-content{transform:scale(1);}
@@ -648,6 +649,8 @@ function openZoomMode(){
   var scrollEl = document.getElementById('zoom-scroll');
   scrollEl.scrollTop  = 0;
   scrollEl.scrollLeft = 0;
+  // スクロールを上に戻したので、ズームインの起点も上に戻しておく
+  content.style.transformOrigin = '50% 0%';
 
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
@@ -659,6 +662,14 @@ function openZoomMode(){
 function closeZoomMode(){
   var overlayEl = document.getElementById('zoom-overlay');
   if(!overlayEl.classList.contains('show')) return;
+
+  // 今見ている場所（上 or 下）を基準にズームアウトさせることで、
+  // 見えている位置から縮んでいく自然な動きにする（カクつき防止）
+  var scrollEl = document.getElementById('zoom-scroll');
+  var contentEl = document.getElementById('zoom-content');
+  var maxScroll = scrollEl.scrollHeight - scrollEl.clientHeight;
+  var nearBottom = maxScroll > 0 && (maxScroll - scrollEl.scrollTop) < scrollEl.clientHeight * 0.5;
+  contentEl.style.transformOrigin = nearBottom ? '50% 100%' : '50% 0%';
 
   // 'open'を外すとマンションがscale(1)→scale(0.55)へズームアウトする
   // （背景はopacityを持たないので、フェードは起きない）
