@@ -165,7 +165,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   background:#235f62;
   opacity:0;
 }
-#zoom-overlay.open{display:block;animation:zoomOverlayIn 0.4s ease forwards;}
+#zoom-overlay.open{display:block;animation:zoomOverlayIn 0.25s ease forwards;}
 @keyframes zoomOverlayIn{to{opacity:1;}}
 #zoom-topbar{
   position:fixed;top:0;left:0;right:0;
@@ -192,10 +192,11 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   max-width:none;
   margin:0 auto;
   opacity:0;
-  transform:scale(0.96);
-  transition:opacity 0.5s ease 0.05s, transform 0.5s ease 0.05s;
+  transform-origin:50% 0%;
+  transform:scale(0.7) translateY(-60px);
+  transition:opacity 0.5s ease, transform 0.5s cubic-bezier(0.2,0.6,0.3,1);
 }
-#zoom-overlay.open #zoom-content{opacity:1;transform:scale(1);}
+#zoom-overlay.open #zoom-content{opacity:1;transform:scale(1) translateY(0);}
 #zoom-content svg{width:100%;height:auto;display:block;}
 </style>
 </head>
