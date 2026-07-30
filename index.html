@@ -641,6 +641,11 @@ function openZoomMode(){
 
   document.body.style.overflow = 'hidden';
 
+  // 毎回必ず同じ位置（左上）から表示されるようスクロール位置をリセット
+  var scrollEl = document.getElementById('zoom-scroll');
+  scrollEl.scrollTop  = 0;
+  scrollEl.scrollLeft = 0;
+
   var overlayEl = document.getElementById('zoom-overlay');
   overlayEl.classList.add('show');
   // 強制的にレイアウトを確定させてから 'open' を付与することで、
@@ -655,32 +660,30 @@ function openZoomMode(){
 
 function closeZoomMode(){
   var overlayEl = document.getElementById('zoom-overlay');
-  if(!overlayEl.classList.contains('open')) return;
+  if(!overlayEl.classList.contains('show')) return;
+  // フェードアウトなどのアニメーションなしで即座に閉じる
   overlayEl.classList.remove('open');
+  overlayEl.classList.remove('show');
   document.body.style.overflow = '';
 
-  setTimeout(function(){
-    overlayEl.classList.remove('show');
+  var stageEl = document.getElementById('stage');
+  stageEl.classList.remove('zoomed-view');
+  if(stageHomeParent){
+    if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
+    else stageHomeParent.appendChild(stageEl);
+  }
 
-    var stageEl = document.getElementById('stage');
-    stageEl.classList.remove('zoomed-view');
-    if(stageHomeParent){
-      if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
-      else stageHomeParent.appendChild(stageEl);
-    }
-
-    var logoEl = document.getElementById('intro-logo');
-    if(logoEl && logoHomeParent){
-      logoEl.style.position       = logoOrigStyle.position;
-      logoEl.style.top            = logoOrigStyle.top;
-      logoEl.style.left           = logoOrigStyle.left;
-      logoEl.style.transform      = logoOrigStyle.transform;
-      logoEl.style.fontSize       = logoOrigStyle.fontSize;
-      logoEl.style.transformOrigin = '';
-      if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
-      else logoHomeParent.appendChild(logoEl);
-    }
-  }, 450);
+  var logoEl = document.getElementById('intro-logo');
+  if(logoEl && logoHomeParent){
+    logoEl.style.position       = logoOrigStyle.position;
+    logoEl.style.top            = logoOrigStyle.top;
+    logoEl.style.left           = logoOrigStyle.left;
+    logoEl.style.transform      = logoOrigStyle.transform;
+    logoEl.style.fontSize       = logoOrigStyle.fontSize;
+    logoEl.style.transformOrigin = '';
+    if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
+    else logoHomeParent.appendChild(logoEl);
+  }
 }
 
 document.getElementById('zoom-btn').addEventListener('click', openZoomMode);
