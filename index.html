@@ -47,13 +47,13 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #stage.visible{opacity:1;}
 #stage svg{width:100%;height:auto;display:block;}
 
-/* 月：左から外れた位置からスライドイン */
+/* 月：ビルの影から出てくるように下方から上昇 */
 #stage .anim-moon{
-  transform:translateX(-200px);
-  transition:transform 1.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  transform:translate(30px, 160px);
+  transition:transform 1.8s cubic-bezier(0.25,0.46,0.45,0.94);
 }
 #stage.anim-moon-in .anim-moon{
-  transform:translateX(0);
+  transform:translate(0,0);
 }
 
 /* 空き室：#666161（SVGデフォルト）、入居者：黄色 */
@@ -188,6 +188,10 @@ fetch('mansion_new.svg')
     // ビル（cls-3）に初期非表示
     var building = document.querySelector('#stage .cls-3');
     if(building) building.style.opacity = '0';
+    // 月がビルの影に隠れるよう、描画順を「月→ビル」に固定
+    if(moon && building && moon.parentNode === building.parentNode){
+      building.parentNode.insertBefore(moon, building);
+    }
       // SVGのロゴテキスト（cls-4グループ）を初期非表示
       var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
       svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
