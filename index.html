@@ -153,6 +153,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 }
 #zoom-btn.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
 #zoom-btn:hover{background:#f5d442;}
+/* スマホ表示ではズーム機能自体を無効化（ボタンを出さない） */
+@media (max-width:767px){
+  #zoom-btn{display:none !important;}
+}
 
 /* 拡大モード（フルスクリーン） */
 #zoom-overlay{
@@ -203,7 +207,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 
 <div id="stage"></div>
 
-<button id="zoom-btn">Expand</button>
+<button id="zoom-btn">Zoom</button>
 
 <div id="zoom-overlay">
   <div id="zoom-topbar">
@@ -593,6 +597,9 @@ var logoHomeNext    = null;
 var logoOrigStyle   = null;
 
 function openZoomMode(){
+  // スマホ幅ではズーム機能自体を無効化
+  if(window.innerWidth < 768) return;
+
   var stageEl = document.getElementById('stage');
   var logoEl  = document.getElementById('intro-logo');
   var content = document.getElementById('zoom-content');
