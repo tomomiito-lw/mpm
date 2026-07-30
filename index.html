@@ -641,16 +641,17 @@ function openZoomMode(){
 
   document.body.style.overflow = 'hidden';
 
+  var overlayEl = document.getElementById('zoom-overlay');
+  overlayEl.classList.add('show');
+  // 強制的にレイアウトを確定させる（表示状態にしてから操作するため）
+  void overlayEl.offsetWidth;
+
   // 毎回必ず同じ位置（左上）から表示されるようスクロール位置をリセット
+  // ※ display:none の間はscrollTopの変更が反映されないため、表示後に行う
   var scrollEl = document.getElementById('zoom-scroll');
   scrollEl.scrollTop  = 0;
   scrollEl.scrollLeft = 0;
 
-  var overlayEl = document.getElementById('zoom-overlay');
-  overlayEl.classList.add('show');
-  // 強制的にレイアウトを確定させてから 'open' を付与することで、
-  // 「小さい状態→大きい状態」のトランジションを確実に発火させる
-  void overlayEl.offsetWidth;
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
       overlayEl.classList.add('open');
