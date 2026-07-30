@@ -163,11 +163,8 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   position:fixed;inset:0;
   z-index:650;
   background:#235f62;
-  opacity:0;
-  transition:opacity 0.35s ease;
 }
 #zoom-overlay.show{display:block;}
-#zoom-overlay.open{opacity:1;}
 #zoom-topbar{
   position:fixed;top:0;left:0;right:0;
   display:flex;justify-content:flex-end;
@@ -662,29 +659,35 @@ function openZoomMode(){
 function closeZoomMode(){
   var overlayEl = document.getElementById('zoom-overlay');
   if(!overlayEl.classList.contains('show')) return;
-  // フェードアウトなどのアニメーションなしで即座に閉じる
+
+  // 'open'を外すとマンションがscale(1)→scale(0.55)へズームアウトする
+  // （背景はopacityを持たないので、フェードは起きない）
   overlayEl.classList.remove('open');
-  overlayEl.classList.remove('show');
   document.body.style.overflow = '';
 
-  var stageEl = document.getElementById('stage');
-  stageEl.classList.remove('zoomed-view');
-  if(stageHomeParent){
-    if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
-    else stageHomeParent.appendChild(stageEl);
-  }
+  // ズームアウトのアニメーションが終わってから、瞬時に非表示にする
+  setTimeout(function(){
+    overlayEl.classList.remove('show');
 
-  var logoEl = document.getElementById('intro-logo');
-  if(logoEl && logoHomeParent){
-    logoEl.style.position       = logoOrigStyle.position;
-    logoEl.style.top            = logoOrigStyle.top;
-    logoEl.style.left           = logoOrigStyle.left;
-    logoEl.style.transform      = logoOrigStyle.transform;
-    logoEl.style.fontSize       = logoOrigStyle.fontSize;
-    logoEl.style.transformOrigin = '';
-    if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
-    else logoHomeParent.appendChild(logoEl);
-  }
+    var stageEl = document.getElementById('stage');
+    stageEl.classList.remove('zoomed-view');
+    if(stageHomeParent){
+      if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
+      else stageHomeParent.appendChild(stageEl);
+    }
+
+    var logoEl = document.getElementById('intro-logo');
+    if(logoEl && logoHomeParent){
+      logoEl.style.position       = logoOrigStyle.position;
+      logoEl.style.top            = logoOrigStyle.top;
+      logoEl.style.left           = logoOrigStyle.left;
+      logoEl.style.transform      = logoOrigStyle.transform;
+      logoEl.style.fontSize       = logoOrigStyle.fontSize;
+      logoEl.style.transformOrigin = '';
+      if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
+      else logoHomeParent.appendChild(logoEl);
+    }
+  }, 450);
 }
 
 document.getElementById('zoom-btn').addEventListener('click', openZoomMode);
