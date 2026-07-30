@@ -164,9 +164,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   z-index:650;
   background:#235f62;
   opacity:0;
+  transition:opacity 0.35s ease;
 }
-#zoom-overlay.open{display:block;animation:zoomOverlayIn 0.25s ease forwards;}
-@keyframes zoomOverlayIn{to{opacity:1;}}
+#zoom-overlay.show{display:block;}
+#zoom-overlay.open{opacity:1;}
 #zoom-topbar{
   position:fixed;top:0;left:0;right:0;
   display:flex;justify-content:flex-end;
@@ -191,12 +192,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   width:900px;
   max-width:none;
   margin:0 auto;
-  opacity:0;
-  transform-origin:50% 0%;
-  transform:scale(0.7) translateY(-60px);
-  transition:opacity 0.5s ease, transform 0.5s cubic-bezier(0.2,0.6,0.3,1);
+  transform:scale(0.55);
+  transition:transform 0.45s cubic-bezier(0.2,0.6,0.3,1);
 }
-#zoom-overlay.open #zoom-content{opacity:1;transform:scale(1) translateY(0);}
+#zoom-overlay.open #zoom-content{transform:scale(1);}
 #zoom-content svg{width:100%;height:auto;display:block;}
 </style>
 </head>
@@ -640,8 +639,18 @@ function openZoomMode(){
     logoEl.style.transform      = 'scale(' + (0.48 * posScale) + ')';
   }
 
-  document.getElementById('zoom-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  var overlayEl = document.getElementById('zoom-overlay');
+  overlayEl.classList.add('show');
+  // 強制的にレイアウトを確定させてから 'open' を付与することで、
+  // 「小さい状態→大きい状態」のトランジションを確実に発火させる
+  void overlayEl.offsetWidth;
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      overlayEl.classList.add('open');
+    });
+  });
 }
 
 function closeZoomMode(){
@@ -650,24 +659,28 @@ function closeZoomMode(){
   overlayEl.classList.remove('open');
   document.body.style.overflow = '';
 
-  var stageEl = document.getElementById('stage');
-  stageEl.classList.remove('zoomed-view');
-  if(stageHomeParent){
-    if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
-    else stageHomeParent.appendChild(stageEl);
-  }
+  setTimeout(function(){
+    overlayEl.classList.remove('show');
 
-  var logoEl = document.getElementById('intro-logo');
-  if(logoEl && logoHomeParent){
-    logoEl.style.position       = logoOrigStyle.position;
-    logoEl.style.top            = logoOrigStyle.top;
-    logoEl.style.left           = logoOrigStyle.left;
-    logoEl.style.transform      = logoOrigStyle.transform;
-    logoEl.style.fontSize       = logoOrigStyle.fontSize;
-    logoEl.style.transformOrigin = '';
-    if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
-    else logoHomeParent.appendChild(logoEl);
-  }
+    var stageEl = document.getElementById('stage');
+    stageEl.classList.remove('zoomed-view');
+    if(stageHomeParent){
+      if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
+      else stageHomeParent.appendChild(stageEl);
+    }
+
+    var logoEl = document.getElementById('intro-logo');
+    if(logoEl && logoHomeParent){
+      logoEl.style.position       = logoOrigStyle.position;
+      logoEl.style.top            = logoOrigStyle.top;
+      logoEl.style.left           = logoOrigStyle.left;
+      logoEl.style.transform      = logoOrigStyle.transform;
+      logoEl.style.fontSize       = logoOrigStyle.fontSize;
+      logoEl.style.transformOrigin = '';
+      if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
+      else logoHomeParent.appendChild(logoEl);
+    }
+  }, 450);
 }
 
 document.getElementById('zoom-btn').addEventListener('click', openZoomMode);
