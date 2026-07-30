@@ -250,7 +250,7 @@ function runIntroAnimation(){
         // SVGのロゴはそのまま非表示のまま
         // オーバーレイロゴが定位置に残る
 
-        // STEP4: 月がビルの裏からスライドイン
+        // STEP4: 月がビルの裏からスライドイン（ビル表示との間隔を少し空ける）
         setTimeout(function(){
           stage.classList.add('anim-moon-in');
           setTimeout(function(){
@@ -258,7 +258,7 @@ function runIntroAnimation(){
             document.body.appendChild(logo);
             loader.classList.add('done');
           }, 1200);
-        }, 300);
+        }, 1100);
 
       }, 1200);  // ロゴ移動完了まで待機
 
