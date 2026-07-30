@@ -134,9 +134,8 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 /* 拡大して見るボタン */
 #zoom-btn{
   position:fixed;
-  left:50%;
-  bottom:84px;
-  transform:translate(-50%,12px);
+  top:56px;
+  right:16px;
   z-index:150;
   display:flex;
   align-items:center;
@@ -145,17 +144,18 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   color:#191818;
   border:none;
   border-radius:100px;
-  padding:11px 22px;
+  padding:9px 18px;
   font-size:13px;
   font-weight:700;
   letter-spacing:0.02em;
   cursor:pointer;
   box-shadow:0 6px 20px rgba(0,0,0,0.35);
   opacity:0;
+  transform:translateY(-8px);
   pointer-events:none;
   transition:opacity 0.5s ease, transform 0.5s ease;
 }
-#zoom-btn.visible{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+#zoom-btn.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
 #zoom-btn:hover{background:#f5d442;}
 #zoom-btn-icon{font-size:14px;}
 
@@ -165,8 +165,10 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   position:fixed;inset:0;
   z-index:650;
   background:#235f62;
+  opacity:0;
 }
-#zoom-overlay.open{display:block;}
+#zoom-overlay.open{display:block;animation:zoomOverlayIn 0.4s ease forwards;}
+@keyframes zoomOverlayIn{to{opacity:1;}}
 #zoom-topbar{
   position:fixed;top:0;left:0;right:0;
   display:flex;justify-content:flex-end;
@@ -187,10 +189,15 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   box-sizing:border-box;
 }
 #zoom-content{
+  position:relative;
   width:900px;
   max-width:none;
   margin:0 auto;
+  opacity:0;
+  transform:scale(0.96);
+  transition:opacity 0.5s ease 0.05s, transform 0.5s ease 0.05s;
 }
+#zoom-overlay.open #zoom-content{opacity:1;transform:scale(1);}
 #zoom-content svg{width:100%;height:auto;display:block;}
 </style>
 </head>
@@ -590,10 +597,15 @@ document.addEventListener('keydown', function(e){
 var ZOOM_WIDTH = 900; // 固定倍率
 var stageHomeParent = null;
 var stageHomeNext    = null;
+var logoHomeParent  = null;
+var logoHomeNext    = null;
+var logoOrigStyle   = null;
 
 function openZoomMode(){
   var stageEl = document.getElementById('stage');
+  var logoEl  = document.getElementById('intro-logo');
   var content = document.getElementById('zoom-content');
+
   if(stageEl.parentNode !== content){
     stageHomeParent = stageEl.parentNode;
     stageHomeNext   = stageEl.nextSibling;
@@ -601,6 +613,29 @@ function openZoomMode(){
   }
   stageEl.classList.add('zoomed-view');
   content.style.width = ZOOM_WIDTH + 'px';
+
+  // ロゴも拡大モード内（マンションの左上）に表示
+  if(logoEl && logoEl.parentNode !== content){
+    logoHomeParent = logoEl.parentNode;
+    logoHomeNext   = logoEl.nextSibling;
+    logoOrigStyle  = {
+      position: logoEl.style.position,
+      top:      logoEl.style.top,
+      left:     logoEl.style.left,
+      transform:logoEl.style.transform,
+      fontSize: logoEl.style.fontSize
+    };
+    content.appendChild(logoEl);
+  }
+  if(logoEl){
+    var scale = ZOOM_WIDTH / 478.8;
+    logoEl.style.position  = 'absolute';
+    logoEl.style.left      = (30 * scale) + 'px';
+    logoEl.style.top       = (26 * scale) + 'px';
+    logoEl.style.transform = 'none';
+    logoEl.style.fontSize  = Math.round(46 * scale) + 'px';
+  }
+
   document.getElementById('zoom-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -610,11 +645,23 @@ function closeZoomMode(){
   if(!overlayEl.classList.contains('open')) return;
   overlayEl.classList.remove('open');
   document.body.style.overflow = '';
+
   var stageEl = document.getElementById('stage');
   stageEl.classList.remove('zoomed-view');
   if(stageHomeParent){
     if(stageHomeNext) stageHomeParent.insertBefore(stageEl, stageHomeNext);
     else stageHomeParent.appendChild(stageEl);
+  }
+
+  var logoEl = document.getElementById('intro-logo');
+  if(logoEl && logoHomeParent){
+    logoEl.style.position  = logoOrigStyle.position;
+    logoEl.style.top       = logoOrigStyle.top;
+    logoEl.style.left      = logoOrigStyle.left;
+    logoEl.style.transform = logoOrigStyle.transform;
+    logoEl.style.fontSize  = logoOrigStyle.fontSize;
+    if(logoHomeNext) logoHomeParent.insertBefore(logoEl, logoHomeNext);
+    else logoHomeParent.appendChild(logoEl);
   }
 }
 
