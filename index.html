@@ -64,7 +64,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 .win-hover{fill:#f5d442 !important;cursor:pointer;}
 
 /* モーダル */
-#overlay{display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,0);}
+#overlay{display:none;position:fixed;inset:0;z-index:700;align-items:center;justify-content:center;background:rgba(0,0,0,0);}
 #overlay.open{display:flex;animation:fadeOverlay 0.3s ease forwards;}
 @keyframes fadeOverlay{to{background:rgba(0,0,0,0.7);}}
 #mbox{background:#fff;border-radius:16px;width:min(520px,94vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.4);opacity:0;transform:translateY(12px);transition:opacity 0.3s ease,transform 0.3s ease;}
@@ -164,7 +164,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   display:none;
   position:fixed;inset:0;
   z-index:650;
-  background:#191818;
+  background:#235f62;
 }
 #zoom-overlay.open{display:block;}
 #zoom-topbar{
@@ -190,22 +190,8 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   width:900px;
   max-width:none;
   margin:0 auto;
-  transition:width 0.35s ease;
 }
 #zoom-content svg{width:100%;height:auto;display:block;}
-#zoom-controls{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  display:flex;gap:10px;z-index:2;
-}
-#zoom-in,#zoom-out{
-  width:44px;height:44px;
-  border-radius:50%;border:none;
-  background:#f5c842;color:#191818;
-  font-size:20px;font-weight:700;
-  cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,0,0,0.3);
-}
-#zoom-in:hover,#zoom-out:hover{background:#f5d442;}
 </style>
 </head>
 <body>
@@ -225,10 +211,6 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   </div>
   <div id="zoom-scroll">
     <div id="zoom-content"></div>
-  </div>
-  <div id="zoom-controls">
-    <button id="zoom-out">－</button>
-    <button id="zoom-in">＋</button>
   </div>
 </div>
 
@@ -605,14 +587,9 @@ document.addEventListener('keydown', function(e){
 });
 
 // ─── 拡大モード ───
-var zoomWidths   = [520, 700, 900, 1150, 1400];
-var zoomWidthIdx = 2; // 900px から開始
+var ZOOM_WIDTH = 900; // 固定倍率
 var stageHomeParent = null;
 var stageHomeNext    = null;
-
-function applyZoomWidth(){
-  document.getElementById('zoom-content').style.width = zoomWidths[zoomWidthIdx] + 'px';
-}
 
 function openZoomMode(){
   var stageEl = document.getElementById('stage');
@@ -623,7 +600,7 @@ function openZoomMode(){
     content.appendChild(stageEl);
   }
   stageEl.classList.add('zoomed-view');
-  applyZoomWidth();
+  content.style.width = ZOOM_WIDTH + 'px';
   document.getElementById('zoom-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -643,14 +620,6 @@ function closeZoomMode(){
 
 document.getElementById('zoom-btn').addEventListener('click', openZoomMode);
 document.getElementById('zoom-close').addEventListener('click', closeZoomMode);
-document.getElementById('zoom-in').addEventListener('click', function(){
-  zoomWidthIdx = Math.min(zoomWidthIdx + 1, zoomWidths.length - 1);
-  applyZoomWidth();
-});
-document.getElementById('zoom-out').addEventListener('click', function(){
-  zoomWidthIdx = Math.max(zoomWidthIdx - 1, 0);
-  applyZoomWidth();
-});
 
 })();
 </script>
