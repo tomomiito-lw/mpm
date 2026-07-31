@@ -266,18 +266,19 @@ function parseRoomRows(rows){
   return newData;
 }
 
-// SVGとスプレッドシートのデータを並列でfetch（これまでは順番待ちで
-// 「SVG読み込み完了→そのあとスプレッドシート取得開始」だったため、
-// 単純に両方の待ち時間が合算されて遅くなっていた）
+// SVGとスプレッドシートは並列でfetchを開始するが、
+// 画面の表示（ビルの描画・イントロ演出）はSVGだけを待って進める。
+// スプレッドシート側（GASの起動）が遅いことがあるため、
+// そちらを待ってしまうと画面表示全体が引っ張られて遅く見えてしまうため。
+var svgReady   = false;
+var pendingRows = null;
+
 var svgFetchPromise = fetch('mansion_new.svg').then(function(r){ return r.text(); });
 var dataFetchPromise = fetch(GAS_URL + '?token=' + GAS_TOKEN)
   .then(function(r){ return r.json(); })
   .catch(function(){ return null; });
 
-Promise.all([svgFetchPromise, dataFetchPromise]).then(function(results){
-  var svgText = results[0];
-  var rows    = results[1];
-
+svgFetchPromise.then(function(svgText){
   document.getElementById('stage').innerHTML = svgText;
   // 月の要素にクラスを付与
   var moon = document.querySelector('#stage .cls-2');
@@ -293,14 +294,32 @@ Promise.all([svgFetchPromise, dataFetchPromise]).then(function(results){
   var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
   svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
 
-  if(rows) roomData = parseRoomRows(rows);
-  firstLoad = false;
-
+  svgReady = true;
   initWindows();
+  // すでにスプレッドシートのデータが先に届いていれば、ここで反映
+  if(pendingRows){
+    roomData  = parseRoomRows(pendingRows);
+    firstLoad = false;
+  }
   applyOccupancy();
   startPolling();
   runIntroAnimation();
 });
+
+dataFetchPromise.then(function(rows){
+  if(!rows) return;
+  if(svgReady){
+    // SVGがすでに表示済みなら、そのまま反映
+    roomData  = parseRoomRows(rows);
+    firstLoad = false;
+    applyOccupancy();
+  } else {
+    // まだSVGが表示されていなければ、SVG側の処理で後から反映する
+    pendingRows = rows;
+  }
+});
+
+
 
 function runIntroAnimation(){
   var logo    = document.getElementById('intro-logo');
@@ -497,6 +516,8 @@ function initAvatar(name){
   el.src = cv.toDataURL(); el.style.display='block';
 }
 
+var modalImgRequestId = 0;
+
 function openModal(roomNum){
   var cr = roomData[roomNum] || null;
   var floor = Math.floor(parseInt(roomNum)/100);
@@ -510,15 +531,25 @@ function openModal(roomNum){
   var roomContainer = document.getElementById('room-svg-container');
   var imgSrc = (cr && cr['MasterPiece画像']) ? cr['MasterPiece画像'] : '';
 
+  // このモーダル呼び出し専用のID。画像読み込み中に別の部屋のモーダルが
+  // 開かれた場合、古い読み込みが後から完了して上書きしてしまうのを防ぐ
+  var requestId = ++modalImgRequestId;
+
   // 作品エリア：横幅固定(660px)、縦は画像に合わせて可変
   // SVGのviewBoxは動的に設定する
   var wallX = 203, wallW = 862; // 壁の横範囲
   var artX = 303, artW = 662;
   var artY = 120, artPad = 10;
 
+  // 前の部屋の画像が一瞬見えてしまわないよう、まず空の状態で即座にクリア
+  var clearArtX = Math.round((203 + 1065) / 2 - 331);
+  var clearArtY = Math.round(640 / 2 - 225);
+  renderRoomSVG(roomContainer, '', clearArtX, clearArtY, 662, 450, 720);
+
   if(imgSrc){
     var img = new Image();
     img.onload = function(){
+      if(requestId !== modalImgRequestId) return; // すでに別の部屋に切り替わっている
       var ratio = img.naturalHeight / img.naturalWidth;
       var maxW = 662, maxH = 500;
       var artW2 = maxW, artH2 = Math.round(maxW * ratio);
@@ -534,15 +565,12 @@ function openModal(roomNum){
       renderRoomSVG(roomContainer, imgSrc, artX2, artY2, artW2, artH2, 720);
     };
     img.onerror = function(){
+      if(requestId !== modalImgRequestId) return; // すでに別の部屋に切り替わっている
       var artX2 = Math.round((203 + 1065) / 2 - 331);
       var artY2 = Math.round(640 / 2 - 225);
       renderRoomSVG(roomContainer, imgSrc, artX2, artY2, 662, 450, 720);
     };
     img.src = imgSrc;
-  } else {
-    var artX2 = Math.round((203 + 1065) / 2 - 331);
-    var artY2 = Math.round(640 / 2 - 225);
-    renderRoomSVG(roomContainer, '', artX2, artY2, 662, 450, 720);
   }
 
   _openModalInfo(cr, roomNum);
