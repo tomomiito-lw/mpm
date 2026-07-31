@@ -257,28 +257,50 @@ var GAS_TOKEN = 'mpm-secret-2026';
 var roomData  = {};
 var firstLoad = true;
 
-// SVGをfetchして埋め込む
-fetch('mansion_new.svg')
-  .then(function(r){ return r.text(); })
-  .then(function(svgText){
-    document.getElementById('stage').innerHTML = svgText;
-    // 月の要素にクラスを付与
-    var moon = document.querySelector('#stage .cls-2');
-    if(moon) moon.classList.add('anim-moon');
-    // ビル（cls-3）に初期非表示
-    var building = document.querySelector('#stage .cls-3');
-    if(building) building.style.opacity = '0';
-    // 月がビルの影に隠れるよう、描画順を「月→ビル」に固定
-    if(moon && building && moon.parentNode === building.parentNode){
-      building.parentNode.insertBefore(moon, building);
-    }
-      // SVGのロゴテキスト（cls-4グループ）を初期非表示
-      var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
-      svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
-    initWindows();
-    startPolling();
-    runIntroAnimation();
+function parseRoomRows(rows){
+  var newData = {};
+  rows.forEach(function(row){
+    var n = String(row['部屋番号']||'').trim();
+    if(n) newData[n] = row;
   });
+  return newData;
+}
+
+// SVGとスプレッドシートのデータを並列でfetch（これまでは順番待ちで
+// 「SVG読み込み完了→そのあとスプレッドシート取得開始」だったため、
+// 単純に両方の待ち時間が合算されて遅くなっていた）
+var svgFetchPromise = fetch('mansion_new.svg').then(function(r){ return r.text(); });
+var dataFetchPromise = fetch(GAS_URL + '?token=' + GAS_TOKEN)
+  .then(function(r){ return r.json(); })
+  .catch(function(){ return null; });
+
+Promise.all([svgFetchPromise, dataFetchPromise]).then(function(results){
+  var svgText = results[0];
+  var rows    = results[1];
+
+  document.getElementById('stage').innerHTML = svgText;
+  // 月の要素にクラスを付与
+  var moon = document.querySelector('#stage .cls-2');
+  if(moon) moon.classList.add('anim-moon');
+  // ビル（cls-3）に初期非表示
+  var building = document.querySelector('#stage .cls-3');
+  if(building) building.style.opacity = '0';
+  // 月がビルの影に隠れるよう、描画順を「月→ビル」に固定
+  if(moon && building && moon.parentNode === building.parentNode){
+    building.parentNode.insertBefore(moon, building);
+  }
+  // SVGのロゴテキスト（cls-4グループ）を初期非表示
+  var svgLogoGroups = document.querySelectorAll('#stage .cls-4');
+  svgLogoGroups.forEach(function(g){ g.style.opacity='0'; });
+
+  if(rows) roomData = parseRoomRows(rows);
+  firstLoad = false;
+
+  initWindows();
+  applyOccupancy();
+  startPolling();
+  runIntroAnimation();
+});
 
 function runIntroAnimation(){
   var logo    = document.getElementById('intro-logo');
@@ -423,11 +445,7 @@ function loadRoomData(){
   fetch(GAS_URL + '?token=' + GAS_TOKEN)
     .then(function(r){ return r.json(); })
     .then(function(rows){
-      var newData = {};
-      rows.forEach(function(row){
-        var n = String(row['部屋番号']||'').trim();
-        if(n) newData[n] = row;
-      });
+      var newData = parseRoomRows(rows);
       var hasNew = !firstLoad && Object.keys(newData).some(function(n){ return !roomData[n]; });
       roomData = newData;
       firstLoad = false;
@@ -457,7 +475,8 @@ var isLive = window.location.search.indexOf('live=true') !== -1;
 var POLL   = isLive ? 5000 : 300000;
 
 function startPolling(){
-  loadRoomData();
+  // 初回データはすでに並列fetchで取得済みのため、ここでは
+  // 次回以降の定期更新（ポーリング）だけをセットする
   setInterval(loadRoomData, POLL);
 }
 
