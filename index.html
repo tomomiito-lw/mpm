@@ -128,6 +128,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   color:#191818;
   white-space:nowrap;
 }
+#tooltip-text.tooltip-text-lg{font-size:20px;}
 
 /* 拡大して見るボタン */
 #zoom-btn{
@@ -418,6 +419,7 @@ function initEntranceAlbumLink(){
   if(!isTouch){
     target.addEventListener('mouseenter', function(){
       document.getElementById('tooltip-text').textContent = '📸';
+      document.getElementById('tooltip-text').classList.add('tooltip-text-lg');
       tooltip.style.display = 'block';
       setTimeout(function(){ tooltip.classList.add('show'); }, 10);
     });
@@ -468,6 +470,7 @@ function initWindows(){
         if(el.classList.contains('win-occupied')){
           el.classList.add('win-hover');
           document.getElementById('tooltip-text').textContent = roomNum + '号室';
+          document.getElementById('tooltip-text').classList.remove('tooltip-text-lg');
           tooltip.style.display = 'block';
           setTimeout(function(){ tooltip.classList.add('show'); }, 10);
         }
