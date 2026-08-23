@@ -413,6 +413,24 @@ function initEntranceAlbumLink(){
   if(!target) return;
   target.style.cursor = 'pointer';
   target.classList.add('win-occupied'); // 黄色にする
+
+  var tooltip = document.getElementById('tooltip');
+  if(!isTouch){
+    target.addEventListener('mouseenter', function(){
+      document.getElementById('tooltip-text').textContent = '📸';
+      tooltip.style.display = 'block';
+      setTimeout(function(){ tooltip.classList.add('show'); }, 10);
+    });
+    target.addEventListener('mousemove', function(e){
+      tooltip.style.left = e.clientX + 'px';
+      tooltip.style.top  = (e.clientY - 8) + 'px';
+    });
+    target.addEventListener('mouseleave', function(){
+      tooltip.classList.remove('show');
+      setTimeout(function(){ tooltip.style.display = 'none'; }, 200);
+    });
+  }
+
   target.addEventListener('click', function(){
     openAlbumModal();
   });
