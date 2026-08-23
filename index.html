@@ -296,6 +296,7 @@ svgFetchPromise.then(function(svgText){
 
   svgReady = true;
   initWindows();
+  initEntranceAlbumLink();
   // すでにスプレッドシートのデータが先に届いていれば、ここで反映
   if(pendingRows){
     roomData  = parseRoomRows(pendingRows);
@@ -397,6 +398,40 @@ function hideLoader(){
 
 // タッチデバイスではツールチップ無効
 var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+// ─── エントランスのイベントアルバムリンク ───
+// 今後 第2回・第3回... が増えたら、この配列に追加するだけでOK
+var EVENT_ALBUMS = [
+  { label: '第一回の写真はこちら', url: 'https://www.flickr.com/gp/loftwork2008/0881dv7837' }
+];
+
+function initEntranceAlbumLink(){
+  var target = document.querySelector(
+    '#stage polygon.cls-6[points="256.48 763.44 271.95 763.08 271.93 703.82 256.48 705.39 256.48 763.44"]'
+  );
+  if(!target) return;
+  target.style.cursor = 'pointer';
+  target.addEventListener('click', function(){
+    openAlbumModal();
+  });
+}
+
+function openAlbumModal(){
+  // 通常の部屋モーダルと同じ枠を流用しつつ、作品画像エリアは非表示にする
+  document.getElementById('mbody-img').style.display = 'none';
+  document.getElementById('mhead-room-label').innerHTML = 'Event<br>Album';
+  document.getElementById('mhead-room').textContent = '🎉';
+
+  var h = '<div class="cs"><div class="csh">Photo Album</div>'
+        + '<div class="links">';
+  EVENT_ALBUMS.forEach(function(a){
+    h += '<a class="lnk" href="'+a.url+'" target="_blank" rel="noopener"><span class="lnk-i">📷</span>'+a.label+'</a>';
+  });
+  h += '</div></div>';
+
+  document.getElementById('creator-content').innerHTML = h;
+  document.getElementById('overlay').classList.add('open');
+}
 
 function initWindows(){
   var tooltip = document.getElementById('tooltip');
@@ -526,6 +561,8 @@ function openModal(roomNum){
 
   // ヘッダーに部屋番号
   document.getElementById('mhead-room').textContent = roomNum;
+  document.getElementById('mhead-room-label').innerHTML = 'Room<br>No.';
+  document.getElementById('mbody-img').style.display = '';
 
   // 部屋SVGに作品画像を埋め込む
   var roomContainer = document.getElementById('room-svg-container');
