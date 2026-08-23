@@ -72,6 +72,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
 #mhead{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #eee;flex-shrink:0;background:#fff;}
 #mhead-left{display:flex;align-items:center;gap:12px;}
 #mhead-room-label{font-size:11px;font-weight:700;color:#111;line-height:1.4;}
+#mhead-room-label.mhead-room-label-lg{font-size:28px;line-height:1.15;}
 #mhead-room{font-size:56px;font-weight:900;color:#111;line-height:1;letter-spacing:-0.02em;}
 @media (max-width:600px){#mhead-room{font-size:48px;}}
 #mhead-right{display:flex;flex-direction:column;align-items:center;gap:4px;}
@@ -411,6 +412,7 @@ function initEntranceAlbumLink(){
   );
   if(!target) return;
   target.style.cursor = 'pointer';
+  target.classList.add('win-occupied'); // 黄色にする
   target.addEventListener('click', function(){
     openAlbumModal();
   });
@@ -419,8 +421,10 @@ function initEntranceAlbumLink(){
 function openAlbumModal(){
   // 通常の部屋モーダルと同じ枠を流用しつつ、作品画像エリアは非表示にする
   document.getElementById('mbody-img').style.display = 'none';
-  document.getElementById('mhead-room-label').innerHTML = 'Event<br>Album';
-  document.getElementById('mhead-room').textContent = '🎉';
+  document.getElementById('mhead-room-label').innerHTML = 'Event Album';
+  document.getElementById('mhead-room-label').classList.add('mhead-room-label-lg');
+  document.getElementById('mhead-room').textContent = '';
+  document.getElementById('mclose-sub').textContent = 'ようこそ！';
 
   var h = '<div class="cs"><div class="csh">Photo Album</div>'
         + '<div class="links">';
@@ -562,6 +566,8 @@ function openModal(roomNum){
   // ヘッダーに部屋番号
   document.getElementById('mhead-room').textContent = roomNum;
   document.getElementById('mhead-room-label').innerHTML = 'Room<br>No.';
+  document.getElementById('mhead-room-label').classList.remove('mhead-room-label-lg');
+  document.getElementById('mclose-sub').textContent = 'お邪魔しました！';
   document.getElementById('mbody-img').style.display = '';
 
   // 部屋SVGに作品画像を埋め込む
