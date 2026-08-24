@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>入居申請 | The Masterpiece Mansion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'BricolageAlphaNum';
+  src: local('Bricolage Grotesque');
+  unicode-range: U+0020-007E;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#235f62;
+  min-height:100vh;
+  font-family:'BricolageAlphaNum','Bricolage Grotesque','Helvetica Neue',sans-serif;
+  color:#191818;
+  padding:40px 16px 80px;
+}
+.wrap{max-width:520px;margin:0 auto;}
+
+.top{color:#fff;margin-bottom:24px;}
+.top a{color:#fff;opacity:0.75;font-size:13px;font-weight:700;text-decoration:none;}
+.top a:hover{opacity:1;}
+.title{font-size:clamp(28px,7vw,40px);font-weight:900;color:#fff;line-height:1.15;margin-top:10px;}
+.subtitle{color:#fff;opacity:0.85;font-size:14px;font-weight:600;margin-top:8px;}
+
+.card{
+  background:#fff;
+  border-radius:20px;
+  padding:28px 24px 32px;
+  margin-top:24px;
+}
+
+.field{margin-bottom:20px;}
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  color:#666;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.field .req{color:#c0453a;margin-left:3px;}
+.field input[type="text"],
+.field input[type="url"],
+.field input[type="number"],
+.field select,
+.field textarea{
+  width:100%;
+  border:1.5px solid #ddd;
+  border-radius:10px;
+  padding:11px 13px;
+  font-size:15px;
+  font-family:inherit;
+  color:#191818;
+  background:#fafafa;
+  transition:border-color 0.15s ease, background 0.15s ease;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  outline:none;
+  border-color:#f5c842;
+  background:#fff;
+}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.field .hint{font-size:12px;color:#999;margin-top:5px;}
+
+.file-drop{
+  border:1.5px dashed #ccc;
+  border-radius:12px;
+  padding:18px;
+  text-align:center;
+  cursor:pointer;
+  background:#fafafa;
+  transition:border-color 0.15s ease, background 0.15s ease;
+}
+.file-drop:hover{border-color:#f5c842;background:#fffbf0;}
+.file-drop input{display:none;}
+.file-drop-label{font-size:13px;font-weight:700;color:#555;}
+.file-preview{
+  margin-top:12px;
+  display:none;
+  align-items:center;
+  gap:10px;
+}
+.file-preview.show{display:flex;}
+.file-preview img{
+  width:56px;height:56px;object-fit:cover;border-radius:8px;background:#eee;
+}
+.file-preview .name{font-size:12px;color:#555;word-break:break-all;}
+
+.submit-btn{
+  width:100%;
+  background:#f5c842;
+  color:#191818;
+  border:none;
+  border-radius:100px;
+  padding:15px;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:0.02em;
+  cursor:pointer;
+  margin-top:8px;
+  transition:background 0.15s ease, opacity 0.15s ease;
+}
+.submit-btn:hover{background:#f5d442;}
+.submit-btn:disabled{opacity:0.55;cursor:not-allowed;}
+
+.status{
+  margin-top:16px;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  display:none;
+  padding:12px;
+  border-radius:10px;
+}
+.status.show{display:block;}
+.status.ok{background:#eaf6ec;color:#1c6b34;}
+.status.err{background:#fbeceb;color:#a3352b;}
+
+.room-select-empty{color:#999;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <a href="./">← マンションへ戻る</a>
+    <div class="title">入居<br>申請フォーム</div>
+    <div class="subtitle">The Masterpiece Mansionへようこそ。あなたの部屋を選んで、作品を飾りましょう。</div>
+  </div>
+
+  <form class="card" id="apply-form">
+
+    <div class="field">
+      <label>部屋番号<span class="req">*</span></label>
+      <select id="f-room" required>
+        <option value="" class="room-select-empty">読み込み中…</option>
+      </select>
+      <div class="hint">すでに入居済みの部屋は表示されません</div>
+    </div>
+
+    <div class="field">
+      <label>作者名<span class="req">*</span></label>
+      <input type="text" id="f-author" required maxlength="60">
+    </div>
+
+    <div class="field">
+      <label>MasterPiece名<span class="req">*</span></label>
+      <input type="text" id="f-title" required maxlength="80">
+    </div>
+
+    <div class="field">
+      <label>MasterPiece画像<span class="req">*</span></label>
+      <div class="file-drop" id="f-drop">
+        <input type="file" id="f-image" accept="image/*" required>
+        <div class="file-drop-label" id="f-drop-label">クリックして画像を選択</div>
+      </div>
+      <div class="file-preview" id="f-preview">
+        <img id="f-preview-img" alt="">
+        <div class="name" id="f-preview-name"></div>
+      </div>
+      <div class="hint">10MBまで（jpg / png / gif など）</div>
+    </div>
+
+    <div class="field">
+      <label>URL</label>
+      <input type="text" id="f-url" placeholder="ポートフォリオサイトなど">
+    </div>
+
+    <div class="field">
+      <label>SNS：Instagram</label>
+      <input type="text" id="f-ig" placeholder="@username">
+    </div>
+
+    <div class="field">
+      <label>SNS：Twitter</label>
+      <input type="text" id="f-tw" placeholder="@username">
+    </div>
+
+    <div class="field">
+      <label>SNS：other</label>
+      <input type="text" id="f-other">
+    </div>
+
+    <div class="field">
+      <label>制作年<span class="req">*</span></label>
+      <input type="number" id="f-year" required min="1900" max="2100" placeholder="2026">
+    </div>
+
+    <div class="field">
+      <label>セールスポイント</label>
+      <textarea id="f-point" maxlength="400"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn" id="f-submit">入居する</button>
+    <div class="status" id="f-status"></div>
+
+  </form>
+</div>
+
+<script>
+var GAS_URL   = 'https://script.google.com/macros/s/AKfycbxRL7jdspiWTsBbI8iI6oWZ7nTmsSZyV_FEOAN3TmAqyMtpVY52Hm2Yh62m7Sk0tmUDQw/exec';
+var GAS_TOKEN = 'mpm-secret-2026';
+
+var roomSelect = document.getElementById('f-room');
+
+// SVGから全部屋番号を集め、GASから入居済み一覧を取り、空いている部屋だけ選べるようにする
+Promise.all([
+  fetch('mansion_new.svg').then(function(r){ return r.text(); }),
+  fetch(GAS_URL + '?token=' + GAS_TOKEN).then(function(r){ return r.json(); }).catch(function(){ return []; })
+]).then(function(results){
+  var svgText  = results[0];
+  var rows     = results[1];
+
+  // id="win-XXX" をすべて拾う（"side"を含むものは除外）
+  var allRooms = [];
+  var re = /id="win-([^"]+)"/g;
+  var m;
+  while((m = re.exec(svgText)) !== null){
+    if(m[1].indexOf('side') !== -1) continue;
+    if(allRooms.indexOf(m[1]) === -1) allRooms.push(m[1]);
+  }
+  allRooms.sort(function(a,b){ return parseInt(a) - parseInt(b); });
+
+  var occupied = {};
+  if(Array.isArray(rows)){
+    rows.forEach(function(row){
+      var n = String(row['部屋番号'] || '').trim();
+      if(n) occupied[n] = true;
+    });
+  }
+
+  var available = allRooms.filter(function(n){ return !occupied[n]; });
+
+  roomSelect.innerHTML = '';
+  if(available.length === 0){
+    roomSelect.innerHTML = '<option value="">現在空室はありません</option>';
+    return;
+  }
+
+  var placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '部屋を選択してください';
+  roomSelect.appendChild(placeholder);
+
+  // フロアごとにグループ化
+  var byFloor = {};
+  available.forEach(function(n){
+    var floor = Math.floor(parseInt(n) / 100);
+    if(!byFloor[floor]) byFloor[floor] = [];
+    byFloor[floor].push(n);
+  });
+  Object.keys(byFloor).sort(function(a,b){ return a - b; }).forEach(function(floor){
+    var group = document.createElement('optgroup');
+    group.label = floor + 'F';
+    byFloor[floor].forEach(function(n){
+      var opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n + '号室';
+      group.appendChild(opt);
+    });
+    roomSelect.appendChild(group);
+  });
+}).catch(function(){
+  roomSelect.innerHTML = '<option value="">読み込みに失敗しました。ページを再読み込みしてください</option>';
+});
+
+// 画像プレビュー
+var fileInput   = document.getElementById('f-image');
+var dropZone    = document.getElementById('f-drop');
+var dropLabel   = document.getElementById('f-drop-label');
+var preview     = document.getElementById('f-preview');
+var previewImg  = document.getElementById('f-preview-img');
+var previewName = document.getElementById('f-preview-name');
+var pendingImageDataUrl = null;
+
+dropZone.addEventListener('click', function(){ fileInput.click(); });
+
+fileInput.addEventListener('change', function(){
+  var file = fileInput.files[0];
+  if(!file) return;
+
+  if(file.size > 10 * 1024 * 1024){
+    showStatus('画像は10MBまでにしてください', false);
+    fileInput.value = '';
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    pendingImageDataUrl = e.target.result;
+    previewImg.src = pendingImageDataUrl;
+    previewName.textContent = file.name;
+    preview.classList.add('show');
+    dropLabel.textContent = '別の画像を選び直す';
+  };
+  reader.readAsDataURL(file);
+});
+
+// 送信
+var form   = document.getElementById('apply-form');
+var submit = document.getElementById('f-submit');
+
+function showStatus(msg, ok){
+  var el = document.getElementById('f-status');
+  el.textContent = msg;
+  el.className = 'status show ' + (ok ? 'ok' : 'err');
+}
+
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+
+  var roomNumber = roomSelect.value;
+  if(!roomNumber){
+    showStatus('部屋番号を選択してください', false);
+    return;
+  }
+  if(!pendingImageDataUrl){
+    showStatus('作品画像を選択してください', false);
+    return;
+  }
+
+  var payload = {
+    token: GAS_TOKEN,
+    '部屋番号': roomNumber,
+    '作者': document.getElementById('f-author').value.trim(),
+    'MasterPiece名': document.getElementById('f-title').value.trim(),
+    'MasterPiece画像': pendingImageDataUrl,
+    'URL': document.getElementById('f-url').value.trim(),
+    'SNS：Instagram': document.getElementById('f-ig').value.trim(),
+    'SNS：Twitter': document.getElementById('f-tw').value.trim(),
+    'SNS：other': document.getElementById('f-other').value.trim(),
+    '制作年': document.getElementById('f-year').value.trim(),
+    'セールスポイント': document.getElementById('f-point').value.trim()
+  };
+
+  submit.disabled = true;
+  submit.textContent = '送信中…';
+  showStatus('', false);
+  document.getElementById('f-status').classList.remove('show');
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライトを避けるため
+    body: JSON.stringify(payload)
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res && res.success){
+        showStatus('入居が完了しました！マンションのページで確認できます。', true);
+        form.reset();
+        preview.classList.remove('show');
+        dropLabel.textContent = 'クリックして画像を選択';
+        pendingImageDataUrl = null;
+        submit.textContent = '入居する';
+        // その部屋を選択肢から除外
+        var opt = roomSelect.querySelector('option[value="'+roomNumber+'"]');
+        if(opt) opt.remove();
+      } else if(res && res.error === 'room_taken'){
+        showStatus('この部屋はすでに入居済みです。別の部屋を選んでください。', false);
+        submit.disabled = false;
+        submit.textContent = '入居する';
+      } else {
+        showStatus('送信に失敗しました。時間をおいて再度お試しください。', false);
+        submit.disabled = false;
+        submit.textContent = '入居する';
+      }
+    })
+    .catch(function(){
+      showStatus('通信エラーが発生しました。時間をおいて再度お試しください。', false);
+      submit.disabled = false;
+      submit.textContent = '入居する';
+    });
+});
+</script>
+</body>
+</html>
