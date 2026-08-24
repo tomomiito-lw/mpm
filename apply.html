@@ -354,8 +354,19 @@ form.addEventListener('submit', function(e){
     headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライトを避けるため
     body: JSON.stringify(payload)
   })
-    .then(function(r){ return r.json(); })
-    .then(function(res){
+    .then(function(r){ return r.text(); })
+    .then(function(rawText){
+      var res;
+      try {
+        res = JSON.parse(rawText);
+      } catch(parseErr){
+        console.error('GASからの応答がJSONとして読めませんでした:', rawText);
+        showStatus('サーバーからの応答が正しく読み取れませんでした（詳細はブラウザのコンソールを確認してください）。', false);
+        submit.disabled = false;
+        submit.textContent = '入居する';
+        return;
+      }
+
       if(res && res.success){
         showStatus('入居が完了しました！マンションのページで確認できます。', true);
         form.reset();
@@ -371,12 +382,16 @@ form.addEventListener('submit', function(e){
         submit.disabled = false;
         submit.textContent = '入居する';
       } else {
-        showStatus('送信に失敗しました。時間をおいて再度お試しください。', false);
+        // 原因調査用に、GASから返ってきたエラー内容をそのまま表示する
+        var detail = (res && (res.message || res.error)) ? (res.error + (res.message ? ': ' + res.message : '')) : '不明なエラー';
+        console.error('GASからのエラー応答:', res);
+        showStatus('送信に失敗しました（' + detail + '）', false);
         submit.disabled = false;
         submit.textContent = '入居する';
       }
     })
-    .catch(function(){
+    .catch(function(err){
+      console.error('fetch自体が失敗しました:', err);
       showStatus('通信エラーが発生しました。時間をおいて再度お試しください。', false);
       submit.disabled = false;
       submit.textContent = '入居する';
