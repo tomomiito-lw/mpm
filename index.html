@@ -108,6 +108,7 @@ body{background:#235f62;min-height:100vh;display:flex;align-items:center;justify
   transition:opacity 0.6s ease;
 }
 #ticker.visible{opacity:1;}
+#ticker.modal-hide{opacity:0 !important;}
 #ticker-track{
   display:inline-block;
   white-space:nowrap;
@@ -772,6 +773,17 @@ document.addEventListener('keydown', function(e){
     closeZoomMode();
   }
 });
+
+// モーダル（部屋の詳細／Event Album）が開いている間はティッカーを非表示にする
+(function(){
+  var overlayEl = document.getElementById('overlay');
+  var tickerEl  = document.getElementById('ticker');
+  if(!overlayEl || !tickerEl) return;
+  var mo = new MutationObserver(function(){
+    tickerEl.classList.toggle('modal-hide', overlayEl.classList.contains('open'));
+  });
+  mo.observe(overlayEl, {attributes:true, attributeFilter:['class']});
+})();
 
 // ─── 拡大モード ───
 var ZOOM_WIDTH = 900; // 固定倍率
